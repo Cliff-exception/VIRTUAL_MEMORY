@@ -128,7 +128,7 @@ int get_from_memory ( int to_mem_offset, int out_mem_offset  ) {
     } 
 
     // grab page being written to memory from page table
-    void * to_mem = mem_block[(KERNEL_MEMORY + to_mem_offset)*PAGE_SIZE]; 
+    char * to_mem = &mem_block[(KERNEL_MEMORY + to_mem_offset)*PAGE_SIZE]; 
 
     // unprotect the page being written into memory (swap_file)
     if ( mprotect(to_mem, PAGE_SIZE, PROT_READ | PROT_WRITE)  == -1) {

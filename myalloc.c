@@ -252,6 +252,7 @@ int get_offset(unsigned long memory_address) {
     return (int) (memory_address & 0xFFF);
 }
 
+/*
 int main(){
     /*
     
@@ -291,6 +292,6 @@ int main(){
         print_page_meta(get_page(i));
         i++;
     }
-    */
+    
     return 0;
-}
+} */
