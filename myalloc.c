@@ -269,6 +269,7 @@ int get_offset(unsigned long memory_address) {
     return (int) (memory_address & 0xFFF);
 }
 
+/*
 int main(){
     //num_page = MEM_SIZE/ (sizeof(page_meta)+ PAGE_SIZE) ; AND TAKE THE FLOOR
     pages_init();
@@ -306,6 +307,6 @@ int main(){
         print_page_meta(get_page(i));
         i++;
     }
-    */
+    
     return 0;
-}
+} */
