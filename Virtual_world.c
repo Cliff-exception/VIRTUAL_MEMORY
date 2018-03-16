@@ -45,8 +45,8 @@ int swap_space_init() {
         exit(EXIT_FAILURE); 
     }
 
-    /*We want the next IO operation to start at the begining of the file
-      So we lseek to the begining of the file to initialize the swap file
+    /*
+     we lseek to the begining of the file to initialize the swap file
     */
 
     if ( lseek(swap_file_descriptor, 0 , SEEK_SET) == -1 ) {
