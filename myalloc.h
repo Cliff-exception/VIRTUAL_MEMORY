@@ -50,4 +50,9 @@ block_meta * find_block(block_meta * blk_list, size_t x);
 void * myallocate(size_t x, char * file, int linenum, int tid_req);
 void mydeallocate(void * ptr, char * file, int linenum, int tid_req);
 
+int get_tid(unsigned long memory_address);
+int get_thread_page_identifier(unsigned long memory_address);
+int get_thread_page_map(unsigned long memory_address);
+int get_offset(unsigned long memory_address);
+
 #endif

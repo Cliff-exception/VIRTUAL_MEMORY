@@ -202,6 +202,34 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
     
 }
 
+//------------------------------------------------------------------------------
+//
+// Functions for demasking parts of a virtual memory address.
+//
+//------------------------------------------------------------------------------
+
+// Get the thread id for a given memory address.
+int get_tid(unsigned long memory_address) {
+    return memory_address = (int) ((memory_address >> 24) & 0xFFFFFFFF);
+}
+
+// Determine the offset from the main page which maps to the corresponding
+// thread page.
+int get_thread_page_identifier(unsigned long memory_address) {
+    return memory_address = (int) ((memory_address >> 18) & 0x3F);
+}
+
+// Determine the offset for the pointer in a thread page that leads to the
+// correct user data page.
+int get_thread_page_map(unsigned long memory_address) {
+    return memory_address = (int) ((memory_address >> 12) & 0x3F);
+}
+
+// Determine the offset inside a page that a memory address maps to.
+int get_offset(unsigned long memory_address) {
+    return (int) (memory_address & 0xFFF);
+}
+
 int main(){
     /*
     
