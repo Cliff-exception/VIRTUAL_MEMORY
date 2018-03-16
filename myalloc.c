@@ -202,7 +202,7 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
     
 }
 
-int main(){
+/*int main(){
     /*
     
     //num_page = MEM_SIZE/ (sizeof(page_meta)+ PAGE_SIZE) ; AND TAKE THE FLOOR
@@ -241,6 +241,6 @@ int main(){
         print_page_meta(get_page(i));
         i++;
     }
-    */
+    
     return 0;
-}
+} */
