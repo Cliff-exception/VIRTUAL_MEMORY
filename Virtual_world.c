@@ -45,9 +45,6 @@ int swap_space_init() {
         exit(EXIT_FAILURE); 
     }
 
-    /*
-     we lseek to the begining of the file to initialize the swap file
-    */
 
     if ( lseek(swap_file_descriptor, 0 , SEEK_SET) == -1 ) {
 
@@ -55,15 +52,62 @@ int swap_space_init() {
         exit(EXIT_FAILURE);         
     }
 
-    /* now set the offset of the swapfile to the size of our memory space by using lseek
-       lseek will increase the size of our swafile by the memsize
+    // and we are done with setting up the swapfile, 
+    // the swapfile grows each time we write to it so there is not need 
+    // initialize size
+
+
+
+/*
+    for testing purposes
+    below is a test progran to show how lseek works
+*/ 
+
+/*
+    char * c = "Hello"; 
+
+    write(swap_file_descriptor, c, strlen(c)); 
+
+    lseek(swap_file_descriptor, 0, SEEK_SET);
+
+    char buff[6]; 
+
+    read(swap_file_descriptor, buff, 5); 
+    buff[6] = '\0'; 
+
+     printf("%s\n", buff );
+
+     bzero(buff, strlen(buff)); 
+
+    lseek(swap_file_descriptor, 6, SEEK_SET); 
+
+    char * d = "howdy"; 
+
+    write(swap_file_descriptor,d,strlen(d)); 
+
+    lseek(swap_file_descriptor,6,SEEK_SET); 
+
+    read(swap_file_descriptor,buff,5); 
+    buff[6] = '\0'; 
+
+    printf("%s\n", buff );
+
     */
 
-    int newOffset = lseek(swap_file_descriptor, MEM_SIZE, SEEK_SET); 
-
-    printf("this is the new size: %d\n", newOffset );
 
     return 1; 
+
+}
+
+/*
+
+to_mem_offset: offset of the page (into the page_table) of the page being written to memory from page table
+out_mem_offset: offset of the page (into swap_file) of the page being written out of memory into page table
+
+*/
+
+int get_from_memory ( int to_mem_offset, int out_mem_offset  ) {
+
 
 }
 
