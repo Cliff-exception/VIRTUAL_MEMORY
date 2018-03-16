@@ -12,7 +12,7 @@
 
 #define MEM_SIZE (8*1024*1024)
 #define PAGE_SIZE (4*1024)
-#define TABLE_AERA 32
+#define KERNEL_MEMORY 32
 #define LIBRARYREQ -1
 //#define THREADREQ 1
 #define SHARED_PAGE 4
@@ -49,5 +49,10 @@ void print_blk_meta(block_meta * blk);
 block_meta * find_block(block_meta * blk_list, size_t x);
 void * myallocate(size_t x, char * file, int linenum, int tid_req);
 void mydeallocate(void * ptr, char * file, int linenum, int tid_req);
+
+int get_tid(unsigned long memory_address);
+int get_thread_page_identifier(unsigned long memory_address);
+int get_thread_page_map(unsigned long memory_address);
+int get_offset(unsigned long memory_address);
 
 #endif

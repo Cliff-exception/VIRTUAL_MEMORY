@@ -1,50 +1,66 @@
 #include "myalloc.h"
 void pages_init(){ //chunk mem into pages of 4kb
 
-     int curr_page = TABLE_AERA;
-     int i = 0;
-     while(curr_page < page_num){
-     
-        page_meta temp_page;
-        
-        temp_page.start = &mem_block[curr_page * PAGE_SIZE];
-        temp_page.start_idx = curr_page * PAGE_SIZE; // debug purpose
-        temp_page.tid = -1;
-        temp_page.page_id = curr_page; 
-        temp_page.free_size = PAGE_SIZE;
-        
-        //printf("pagenum:%d page addr%d",i,curr_page * PAGE_SIZE);
-        page_meta * temp = (page_meta*)&mem_block[i *sizeof(page_meta)];
-        memcpy(temp,&temp_page,sizeof(page_meta));
-        
-        block_meta temp_block;
-        //fill the block
-            temp_block.istaken = 0;
-            temp_block.blk_size = PAGE_SIZE - 2*sizeof(block_meta);
-            temp_block.prev = NULL;
-            temp_block.next = NULL;
-        //
-        /*
-        printf("init block:\n");
-        print_blk_meta(&temp_block);
-        */
-        memcpy(temp->start,&temp_block,sizeof(block_meta));// copy to lower bound
-        temp->blk_list = (block_meta*)temp->start;
-        
-        memcpy(&mem_block[(curr_page+1) * PAGE_SIZE - sizeof(block_meta)],&temp_block,sizeof(block_meta)); //copy to upper bound
-        
-            //printf("lower in a page: %d\nhiger in a page: %d\n",curr_page * PAGE_SIZE,(curr_page+1) * PAGE_SIZE - sizeof(block_meta));
-            //just some code might not even work
-        //printf("\tdata addr%d\n",i,i*sizeof(page_meta)+sizeof(block_meta));
-        
-        curr_page++;
-        i++;
-     }
+     int curr_page = KERNEL_MEMORY;
+
+	 while(curr_page < page_num){
+	 
+	 /*
+	 	page_meta temp_page;
+	 	
+	 	temp_page.start = &mem_block[curr_page * PAGE_SIZE];
+	 	temp_page.start_idx = curr_page * PAGE_SIZE; // debug purpose
+	 	temp_page.tid = -1;
+	 	temp_page.page_id = curr_page; 
+	 	temp_page.free_size = PAGE_SIZE;
+	 	
+	 	//printf("pagenum:%d page addr%d",i,curr_page * PAGE_SIZE);
+	 	page_meta * temp = (page_meta*)&mem_block[i *sizeof(page_meta)];
+	 	memcpy(temp,&temp_page,sizeof(page_meta));
+	 
+	 	block_meta temp_block;
+	 	//fill the block
+	 		temp_block.istaken = 0;
+	 		temp_block.blk_size = PAGE_SIZE - 2*sizeof(block_meta);
+	 		temp_block.prev = NULL;
+			temp_block.next = NULL;
+	 	//
+	 	
+	 	//printf("init block:\n");
+	 	//print_blk_meta(&temp_block);
+	 	
+	 	memcpy(temp->start,&temp_block,sizeof(block_meta));// copy to lower bound
+	 	temp->blk_list = (block_meta*)temp->start;
+	 	
+	 	*/
+	 	block_meta temp_block;
+	 	//fill the block
+	 		temp_block.istaken = 0;
+	 		temp_block.blk_size = PAGE_SIZE - 2*sizeof(block_meta);
+	 		temp_block.prev = NULL;
+			temp_block.next = NULL;
+	 	//
+	 	
+	 	//printf("init block:\n");
+	 	//print_blk_meta(&temp_block);
+	 	
+	 	memcpy(&mem_block[curr_page * PAGE_SIZE],&temp_block,sizeof(block_meta));// copy to lower bound
+	 	
+	 	
+	 	memcpy(&mem_block[(curr_page+1) * PAGE_SIZE - sizeof(block_meta)],&temp_block,sizeof(block_meta)); //copy to upper bound
+	 	
+	 		//printf("lower in a page: %d\nhiger in a page: %d\n",curr_page * PAGE_SIZE,(curr_page+1) * PAGE_SIZE - sizeof(block_meta));
+	 		//just some code might not even work
+	 	//printf("\tdata addr%d\n",i,i*sizeof(page_meta)+sizeof(block_meta));
+	 	
+	 	curr_page++;
+	 	
+	 }
 }
 
 page_meta * get_page(int page_id){
-    assert(page_id>=TABLE_AERA);
-    return (page_meta*)&mem_block[(page_id-TABLE_AERA) * sizeof(page_meta)];
+    assert(page_id>=KERNEL_MEMORY);
+    return (page_meta*)&mem_block[(page_id-KERNEL_MEMORY) * sizeof(page_meta)];
 }
 
 page_meta * find_page(int tid){// very bad hashing, subject to change
@@ -96,12 +112,18 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
     
         return NULL;
     }
-    
+    /*
     page_meta * curr_page = find_page(tid_req);
     curr_page->tid = tid_req;
+    */
+    
+    //TODO: find a page by given tid_req, and assign it to curr_page
+    void * curr_page;
     
     //printf("page:%d\n",curr_page->page_id);
-    block_meta * first_fit = find_block(curr_page->blk_list,x);
+    //block_meta * first_fit = find_block(curr_page->blk_list,x);
+    
+    block_meta * first_fit = find_block(curr_page,x);
     if(!first_fit) {
         printf("page full!\n");
     
@@ -200,6 +222,34 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
         */
     }
     
+}
+
+//------------------------------------------------------------------------------
+//
+// Functions for demasking parts of a virtual memory address.
+//
+//------------------------------------------------------------------------------
+
+// Get the thread id for a given memory address.
+int get_tid(unsigned long memory_address) {
+    return memory_address = (int) ((memory_address >> 24) & 0xFFFFFFFF);
+}
+
+// Determine the offset from the main page which maps to the corresponding
+// thread page.
+int get_thread_page_identifier(unsigned long memory_address) {
+    return memory_address = (int) ((memory_address >> 18) & 0x3F);
+}
+
+// Determine the offset for the pointer in a thread page that leads to the
+// correct user data page.
+int get_thread_page_map(unsigned long memory_address) {
+    return memory_address = (int) ((memory_address >> 12) & 0x3F);
+}
+
+// Determine the offset inside a page that a memory address maps to.
+int get_offset(unsigned long memory_address) {
+    return (int) (memory_address & 0xFFF);
 }
 
 int main(){
