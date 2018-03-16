@@ -108,6 +108,65 @@ out_mem_offset: offset of the page (into swap_file) of the page being written ou
 
 int get_from_memory ( int to_mem_offset, int out_mem_offset  ) {
 
+    // buffer for the page we are reading from swapfile
+    char from_mem[PAGE_SIZE]; 
+
+    int seek_size = lseek(swap_file_descriptor, out_mem_offset*PAGE_SIZE, SEEK_SET); 
+
+    if ( seek_size == -1 ) {
+
+        printf("Error finding page finding memory\n");
+        exit(EXIT_FAILURE); 
+    }
+
+    int read_bytes = read(swap_file_descriptor, from_mem, PAGE_SIZE);
+
+    if ( read_bytes == 0  ) {
+
+        printf("Error reading from swap_file\n");
+        exit(EXIT_FAILURE); 
+    } 
+
+    // grab page being written to memory from page table
+    void * to_mem = mem_block[(KERNEL_MEMORY + to_mem_offset)*PAGE_SIZE]; 
+
+    // unprotect the page being written into memory (swap_file)
+    if ( mprotect(to_mem, PAGE_SIZE, PROT_READ | PROT_WRITE)  == -1) {
+
+        printf("Error unprotecting memory\n");
+        exit(EXIT_FAILURE); 
+    }
+
+
+    /* now write the page into swap_file
+       note: we are doing a direct swapping, the page going out of the page table
+       will take the spot (in the swapfile) of the page coming into the page table
+       vise versa  
+    */
+
+    int seek_size_2 = lseek(swap_file_descriptor, out_mem_offset*PAGE_SIZE, SEEK_SET); 
+
+    if ( seek_size_2 == -1 ) {
+
+        printf("Error getting offset of page in memory\n");
+        exit(EXIT_FAILURE); 
+    }
+
+    int bytes_written = write(swap_file_descriptor, to_mem, PAGE_SIZE); 
+
+    if ( bytes_written <= 0 ){
+
+        printf("error writing page to memory\n");
+        exit(EXIT_FAILURE); 
+    }
+
+
+    // now we shall do a direct swap using memcpy
+    memcpy(to_mem, from_mem, PAGE_SIZE ); 
+
+    // might need to modify metadata of pages
+
+    return 1; 
 
 }
 
