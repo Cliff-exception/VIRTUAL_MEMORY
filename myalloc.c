@@ -78,7 +78,7 @@ block_meta * find_block(int tid_req, size_t x) {
     
     // Look for a page that is used by the given tid_req.
     int i = 0;
-    for ( ; i < USER_PAGES; i++) {
+    for ( ; i < USER_PAGES - 1; i++) {
         temp = (block_meta*) &mem_block[(MAIN_PAGE + PAGE_SIZE) + 
                                         (i * PAGE_SIZE)];
         if (first == NULL && temp->p_type == UNASSIGNED)
@@ -92,6 +92,7 @@ block_meta * find_block(int tid_req, size_t x) {
 
     // At this point, all pages with given tid = tid_req don't have enough
     // room for storing x bits. Using the first found UNASSIGNED page.
+    first->tid = tid_req;
     return first;
 }
 
@@ -173,8 +174,7 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
     
     printf("\n\n\n\n");
 */
-    
-    return (void *)( (long)first_fit + sizeof(block_meta) );
+    return (void *)( (unsigned long)first_fit + sizeof(block_meta) );
 }
 
 //mydeallocate(x, __FILE__, __LINE__, THREADREQ)
@@ -243,25 +243,36 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
 
 //------------------------------------------------------------------------------
 //
-// Functions for demasking parts of a virtual memory address.
+// Functions for adding and demasking parts of a virtual memory address.
 //
 //------------------------------------------------------------------------------
 
+// Append the tid for a given thread onto the memory address.
+unsigned long append_tid(unsigned long memory_address, int tid) {
+    return (tid << 24) + memory_address;
+}
+
 // Get the thread id for a given memory address.
 int get_tid(unsigned long memory_address) {
-    return memory_address = (int) ((memory_address >> 24) & 0xFFFFFFFF);
+    return (int) ((memory_address >> 24) & 0xFFFFFFFF);
+}
+
+// Get the "physical address" for a location in mem_block given a
+// virtualized address.
+unsigned long get_physical_address(unsigned long memory_address) {
+    return (unsigned long) (memory_address & 0xFFFFFF);
 }
 
 // Determine the offset from the main page which maps to the corresponding
 // thread page.
 int get_thread_page_identifier(unsigned long memory_address) {
-    return memory_address = (int) ((memory_address >> 18) & 0x3F);
+    return ((memory_address >> 18) & 0x3F);
 }
 
 // Determine the offset for the pointer in a thread page that leads to the
 // correct user data page.
 int get_thread_page_map(unsigned long memory_address) {
-    return memory_address = (int) ((memory_address >> 12) & 0x3F);
+    return ((memory_address >> 12) & 0x3F);
 }
 
 // Determine the offset inside a page that a memory address maps to.
@@ -269,7 +280,6 @@ int get_offset(unsigned long memory_address) {
     return (int) (memory_address & 0xFFF);
 }
 
-/*
 int main(){
     //num_page = MEM_SIZE/ (sizeof(page_meta)+ PAGE_SIZE) ; AND TAKE THE FLOOR
     pages_init();
@@ -307,6 +317,6 @@ int main(){
         print_page_meta(get_page(i));
         i++;
     }
-    
+    */
     return 0;
-} */
+}
