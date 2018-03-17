@@ -16,6 +16,8 @@
 
 int swap_file_descriptor; 
 
+int swap_offset = 0; 
+
 
 int swap_space_init() {
 
@@ -103,10 +105,11 @@ int swap_space_init() {
 
 to_mem_offset: offset of the page (into the page_table) of the page being written to memory from page table
 out_mem_offset: offset of the page (into swap_file) of the page being written out of memory into page table
-
+to_mem_swap_offset: a pointer to the offset (in the swapfile) of the page being moved into the swapfile
+                    the pointer allows us to assign a new offset if the page does yet reside in the swapfile
 */
 
-int get_from_memory ( int to_mem_offset, int out_mem_offset  ) {
+int get_from_memory ( int to_mem_offset, int out_mem_offset, int * to_mem_swap_offset  ) {
 
     // buffer for the page we are reading from swapfile
     char from_mem[PAGE_SIZE]; 
@@ -136,15 +139,23 @@ int get_from_memory ( int to_mem_offset, int out_mem_offset  ) {
         printf("Error unprotecting memory\n");
         exit(EXIT_FAILURE); 
     }
+ 
+    int swap_file_offset  = *to_mem_swap_offset; 
 
-
-    /* now write the page into swap_file
-       note: we are doing a direct swapping, the page going out of the page table
-       will take the spot (in the swapfile) of the page coming into the page table
-       vise versa  
+    /* if the page being swapped out does not currently live in the swapfile
+       assign it the next free index on the swapfile and write it to that index
     */
+    if ( swap_file_offset == -1 ) {
 
-    int seek_size_2 = lseek(swap_file_descriptor, out_mem_offset*PAGE_SIZE, SEEK_SET); 
+        swap_file_offset = swap_offset++; 
+        *to_mem_swap_offset = swap_file_offset; 
+    }
+
+
+    /* now lseek() to the position (in the swap_file) of the page being place in the swapfile
+       and write it to the swapfile
+    */
+    int seek_size_2 = lseek(swap_file_descriptor, swap_file_offset*PAGE_SIZE, SEEK_SET); 
 
     if ( seek_size_2 == -1 ) {
 
