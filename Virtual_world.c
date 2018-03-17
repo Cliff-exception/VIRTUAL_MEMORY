@@ -138,10 +138,12 @@ int get_from_memory ( int to_mem_offset, int out_mem_offset, int * to_mem_swap_o
         printf("Error unprotecting memory\n");
         exit(EXIT_FAILURE); 
     }
-
+ 
     int swap_file_offset  = *to_mem_swap_offset; 
 
-    // if the page being swapped out does not currently live in the swapfile, swap it out
+    /* if the page being swapped out does not currently live in the swapfile
+       assign it the next free index on the swapfile and write it to that index
+    */
     if ( swap_file_offset == -1 ) {
 
         swap_file_offset = swap_offset++; 
