@@ -105,7 +105,8 @@ int swap_space_init() {
 
 to_mem_offset: offset of the page (into the page_table) of the page being written to memory from page table
 out_mem_offset: offset of the page (into swap_file) of the page being written out of memory into page table
-
+to_mem_swap_offset: a pointer to the offset (in the swapfile) of the page being moved into the swapfile
+                    the pointer allows us to assign a new offset if the page does yet reside in the swapfile
 */
 
 int get_from_memory ( int to_mem_offset, int out_mem_offset, int * to_mem_swap_offset  ) {
