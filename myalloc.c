@@ -1,7 +1,8 @@
 #include "myalloc.h"
 void pages_init(){ //chunk mem into pages of 4kb
+    mem_block = (char*) memalign(sysconf(_SC_PAGE_SIZE), MEM_SIZE);
 
-    int curr_page = KERNEL_MEMORY;
+    int curr_page = (PAGE_TABLE_SIZE / 2048) + KERNEL_MEMORY;
     size_t block_size = PAGE_SIZE - 2*sizeof(block_meta);
 
     while(curr_page < page_num){
@@ -26,11 +27,6 @@ void pages_init(){ //chunk mem into pages of 4kb
         
         curr_page++;
     }
-
-    // Ensure that the first user block is of type THREAD, it will be used for
-    // dereferencing memory addresses.
-    block_meta * temp_block = (block_meta*) &mem_block[MAIN_PAGE];
-    temp_block->p_type = THREAD;
 }
 
 /* Tyson - Commenting out for time being, need to fix to work with memory mapping.
@@ -78,9 +74,8 @@ block_meta * find_block(int tid_req, size_t x) {
     
     // Look for a page that is used by the given tid_req.
     int i = 0;
-    for ( ; i < USER_PAGES - 1; i++) {
-        temp = (block_meta*) &mem_block[(MAIN_PAGE + PAGE_SIZE) + 
-                                        (i * PAGE_SIZE)];
+    for ( ; i < NUM_USER_PAGES; i++) {
+        temp = (block_meta*) &mem_block[FIRST_USER_PAGE];
         if (first == NULL && temp->p_type == UNASSIGNED)
             first = temp;
         else if (temp->p_type != UNASSIGNED && temp->tid == tid_req) {
@@ -243,43 +238,95 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
 
 //------------------------------------------------------------------------------
 //
+// Functions for placing and inspecting the top 11 bits of a physical memory
+// address into the inverted page table.
+//
+//------------------------------------------------------------------------------
+
+// Get a virtual address for the given physical address. Behind the scenes this
+// function updates the inverted page table to contain the necessary bits from
+// the given physical address.
+unsigned long get_virtual_address(int tid, unsigned long physical_address) {
+    int page = get_page_number_phy(physical_address);
+    place_bits_in_table(tid, page, physical_address);
+
+    return build_virtual_address(page, get_offset(physical_address));
+}
+
+// Peels of the upper bits of a physical address and stores it at the correct
+// position for the given tid and page inside an inverted page table.
+void place_bits_in_table(int tid, int page, unsigned long physical_address) {
+    int upper_phy_mem = get_upper_phy_mem(physical_address);
+    int offset = tid * NUM_USER_PAGES + page;
+
+    memcpy(&mem_block[offset], &upper_phy_mem, sizeof(int));
+
+    return;
+}
+
+// Get the value held in the inverted page table for the given tid and page.
+int get_bits_from_table(int tid, int page) {
+    int upper_phy_value;
+    int offset = tid * NUM_USER_PAGES + page;
+
+    memcpy(&upper_phy_value, &mem_block[offset], sizeof(int));
+
+    return upper_phy_value;
+}
+
+//------------------------------------------------------------------------------
+//
 // Functions for adding and demasking parts of a virtual memory address.
 //
 //------------------------------------------------------------------------------
 
-// Append the tid for a given thread onto the memory address.
-unsigned long append_tid(unsigned long memory_address, int tid) {
-    return (tid << 24) + memory_address;
+// Get the page number from the given physical address.
+int get_page_number_phy(unsigned long physical_address) {
+    physical_address = physical_address -
+                       ( (unsigned long) &mem_block
+                                       + PAGE_TABLE_SIZE
+                                       + (KERNEL_MEMORY * PAGE_SIZE) );
+    return physical_address / PAGE_SIZE;
 }
 
-// Get the thread id for a given memory address.
-int get_tid(unsigned long memory_address) {
-    return (int) ((memory_address >> 24) & 0xFFFFFFFF);
-}
-
-// Get the "physical address" for a location in mem_block given a
-// virtualized address.
-unsigned long get_physical_address(unsigned long memory_address) {
-    return (unsigned long) (memory_address & 0xFFFFFF);
-}
-
-// Determine the offset from the main page which maps to the corresponding
-// thread page.
-int get_thread_page_identifier(unsigned long memory_address) {
-    return ((memory_address >> 18) & 0x3F);
-}
-
-// Determine the offset for the pointer in a thread page that leads to the
-// correct user data page.
-int get_thread_page_map(unsigned long memory_address) {
-    return ((memory_address >> 12) & 0x3F);
+// Get the page number from the given virtual address.
+int get_page_number_virtual(unsigned long virtual_address) {
+    unsigned long mem_base = (unsigned long) &mem_block & 
+                             0xFFFFFFFFFFFFF000;
+    return (int) (((virtual_address - mem_base) >> 12) & 0x7FF);
 }
 
 // Determine the offset inside a page that a memory address maps to.
+// This function works to get offset from both virtual addresses and
+// physical addresses.
 int get_offset(unsigned long memory_address) {
     return (int) (memory_address & 0xFFF);
 }
 
+// Get the portion of physical memory address to be stored in inverted page
+// table.
+int get_upper_phy_mem(unsigned long physical_address) {
+    return (int) ((physical_address >> 12) & 0x7FF);
+}
+
+// Build the virtual address to be passed on to user.
+unsigned long build_virtual_address(int page, int offset) {
+    unsigned long mem_base = (unsigned long) &mem_block & 
+                             0xFFFFFFFFFFFFF000;
+    return (unsigned long) ((page << 12) + mem_base + offset);
+}
+
+int main() {
+    pages_init();
+    printf("%lu\n", &mem_block);
+    printf("%lu\n", build_virtual_address(2, get_offset((unsigned long) &mem_block)));
+    printf("%lu\n", get_page_number_virtual(build_virtual_address(3, get_offset((unsigned long) &mem_block))));
+    printf("%d\n", get_page_number_phy(6635632 + 4095));
+    place_bits_in_table(3, 4, (6635632 + 4095));
+    printf("%d\n", get_bits_from_table(3, 4));
+}
+
+/*
 int main(){
     //num_page = MEM_SIZE/ (sizeof(page_meta)+ PAGE_SIZE) ; AND TAKE THE FLOOR
     pages_init();
@@ -318,5 +365,5 @@ int main(){
         i++;
     }
     */
-    return 0;
-}
+//    return 0;
+//}
