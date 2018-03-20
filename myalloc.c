@@ -36,7 +36,8 @@ page_meta * find_page(int tid){// very bad hashing, subject to change
 }
 void print_page_meta(page_meta * page){
     printf("page id: %d\n",page->page_id);
-    if(page->start == &mem_block[page-> page_id* PAGE_SIZE]) printf("%d\t",page->page_id * PAGE_SIZE);
+    if(page->start == &mem_block[page-> page_id* PAGE_SIZE]) 
+        printf("%d\t",page->page_id * PAGE_SIZE);
     printf("*start: %x\n",page->start);
     
     printf("free size:%d\ntid: %d\n\n\n\n\n",page->free_size,page->tid);
@@ -172,8 +173,9 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
     upper_bound->p_type = UNASSIGNED;
     
     size_t new_size;
+    //coalescing with a higher free block
     if((upper_bound+1)->p_type == UNASSIGNED && 
-        (((long)(upper_bound+1) - (long)&mem_block)% PAGE_SIZE != 0 )){ //coalescing with a higher free block
+        (((long)(upper_bound+1) - (long)&mem_block)% PAGE_SIZE != 0 )){
         
         //printf("coalescing with a higher free block\n");
         
@@ -194,8 +196,9 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
         */
     }
     
+    //coalescing with a lower free block
     if((lower_bound-1)->p_type == UNASSIGNED &&     
-            ((((long)lower_bound) - (long)&mem_block)% PAGE_SIZE != 0 )){   //coalescing with a lower free block
+            ((((long)lower_bound) - (long)&mem_block)% PAGE_SIZE != 0 )){
     
         //(((long)lower_bound)% PAGE_SIZE != 0 )){ 
         
@@ -209,7 +212,10 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
         block_meta * new_lower = (void *) ((long)(lower_bound - 1) - 
                                            (lower_bound-1)->blk_size);
         
-        //printf("new size %d = %d + %d + 2*meta:%d\n",new_size, lower_bound -> blk_size ,(lower_bound-1)->blk_size,2*sizeof(block_meta));
+//        printf("new size %d = %d + %d + 2*meta:%d\n",new_size, 
+//                                                     lower_bound -> blk_size ,
+//                                                     (lower_bound-1)->blk_size,
+//                                                     2*sizeof(block_meta));
         upper_bound -> blk_size = new_size;
         new_lower   -> blk_size = new_size;
         new_lower   -> next     = upper_bound->next;
@@ -219,6 +225,45 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
         */
     }
     
+}
+
+//------------------------------------------------------------------------------
+//
+// Functions that handle the swapping of pages in memory as well as updating
+// their corresponding entries in the inverted page table.
+//
+//------------------------------------------------------------------------------
+
+// For a given page number, determine the tid that currently owns the data
+// within this page. A return value of -1 means that this page is currently
+// free.
+int get_active_tid(int page) {
+    int i = 0;
+    int current_page;
+    for ( ; i < NUM_PROCESSES; i++) {
+        current_page = get_upper_phy_mem_table(i, page);
+        if (current_page == page)
+            return i;
+    }
+
+    return -1;
+}
+
+void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
+    int in_offset = FIRST_USER_PAGE + in_pos_page * PAGE_SIZE;
+    int out_offset = FIRST_USER_PAGE + out_pos_page * PAGE_SIZE;
+
+    // Swap pages within memory utilizing swap page location as pivot.
+    memcpy(&mem_block[SWAP_PAGE], &mem_block[in_offset], PAGE_SIZE);
+    memcpy(&mem_block[in_offset], &mem_block[out_offset], PAGE_SIZE);
+    memcpy(&mem_block[out_offset], &mem_block[SWAP_PAGE], PAGE_SIZE);
+
+    int in_tid = get_active_tid(in_pos_page);
+
+    update_table_entry(in_tid, in_pos_page, out_pos_page);
+    update_table_entry(out_tid, in_pos_page, in_pos_page);
+
+    return;
 }
 
 //------------------------------------------------------------------------------
@@ -236,19 +281,34 @@ unsigned long get_virtual_address(int num_pages,
                                   unsigned long physical_address) {
     int page = get_page_number_phy(physical_address);
     if (num_pages == 1)
-        update_table(1, tid, page, physical_address);
+        update_table_address(1, tid, page, physical_address);
     else
         update_table_multi_page(tid, num_pages, physical_address);
 
     return build_virtual_address(page, get_physical_offset(physical_address));
 }
 
-// Peels of the upper bits of a physical address and stores it at the correct
+// Update the page that is stored for a given tid inside the inverted page
+// table.
+void update_table_entry(int tid, int page, int new_page) {
+    int offset = tid * NUM_USER_PAGES + (page * sizeof(int));
+
+    int has_block_meta  = contains_block_meta(tid, page);
+
+    if (has_block_meta > 0)
+        new_page = (1 << 12) + new_page;
+
+    memcpy(&mem_block[offset], &new_page, sizeof(int));
+
+    return;
+}
+
+// Peels off the upper bits of a physical address and stores it at the correct
 // position for the given tid and page inside an inverted page table.
-void update_table(int has_block_meta, 
-                  int tid, 
-                  int page, 
-                  unsigned long physical_address) {
+void update_table_address(int has_block_meta, 
+                          int tid, 
+                          int page, 
+                          unsigned long physical_address) {
     int offset = tid * NUM_USER_PAGES + (page * sizeof(int));
 
     int table_entry = get_upper_phy_mem(physical_address);
@@ -270,11 +330,14 @@ void update_table_multi_page(int tid,
                              int num_pages,
                              unsigned long physical_address) {
     int first_page = get_page_number_phy(physical_address);
-    update_table(1, tid, first_page, physical_address);
+    update_table_address(1, tid, first_page, physical_address);
 
+    physical_address += PAGE_SIZE;
     int i = first_page + 1;
-    for ( ; i < (first_page + num_pages); i++)
-        update_table(0, tid, i, physical_address);
+    for ( ; i < (first_page + num_pages); i++) {
+        update_table_address(0, tid, i, physical_address);
+        physical_address += PAGE_SIZE;
+    }
 
     return;
 }
@@ -360,25 +423,41 @@ unsigned long build_virtual_address(int page, int offset) {
 
 int main() {
     pages_init();
-    printf("%lu\n", &mem_block);
-    printf("%lu\n", build_virtual_address(2, get_physical_offset((unsigned long) &mem_block)));
-    printf("%lu\n", get_page_number_virtual(build_virtual_address(2, get_physical_offset((unsigned long) &mem_block))));
-    printf("%d\n", get_page_number_phy(6635632 + 4095));
-//    update_table(1, 3, 4, (6635632 + 4095));
-//    printf("%d\n", get_table_entry(3, 4));
-//    printf("%d\n", contains_block_meta(3, 4));
-//    printf("%d\n", get_upper_phy_mem_table(3, 4));
-    update_table_multi_page(3, 4, ((unsigned long) &mem_block) + FIRST_USER_PAGE + 54097);
+    unsigned long test_address = ((unsigned long) &mem_block) + FIRST_USER_PAGE + 54097;
     int page = get_page_number_phy(((unsigned long) &mem_block) + FIRST_USER_PAGE + 54097);
-    printf("%d\n", get_table_entry(3, page));
-    printf("%d\n", get_table_entry(3, page+1));
-    printf("%d\n", get_table_entry(3, page+2));
-    printf("%d\n", get_table_entry(3, page+3));
-    printf("%d\n", get_table_entry(3, page+4));
-    printf("%d\n", contains_block_meta(3, page+1));
-    printf("%d\n", get_upper_phy_mem_table(3, page+1));
+    update_table_multi_page(3, 4, test_address);
+    update_table_address(1, 4, page+3, test_address + 5 * PAGE_SIZE);
 
-    printf("%d\n", NUM_USER_PAGES);
+    int store = 2094;
+    memcpy(&mem_block[FIRST_USER_PAGE + (page + 3) * PAGE_SIZE], &store, sizeof(int));
+
+    int temp1;
+    int temp2;
+
+    printf("\n-----Original Setup-----\n");
+    memcpy(&temp1, &mem_block[FIRST_USER_PAGE + (page + 3) * PAGE_SIZE], sizeof(int));
+    memcpy(&temp2, &mem_block[FIRST_USER_PAGE + (page + 5) * PAGE_SIZE], sizeof(int));
+    printf("IN ACTIVE PAGE: %d\n", temp1);
+    printf("IN SWAP PAGE: %d\n", temp2);
+    printf("ACTIVE TID: %d\n", get_active_tid(page+3));
+
+    printf("\n-----Swapping Here-----\n");
+    swap_pages(page+3, 4, page+5);
+
+    memcpy(&temp1, &mem_block[FIRST_USER_PAGE + (page + 3) * PAGE_SIZE], sizeof(int));
+    memcpy(&temp2, &mem_block[FIRST_USER_PAGE + (page + 5) * PAGE_SIZE], sizeof(int));
+    printf("IN ACTIVE PAGE: %d\n", temp1);
+    printf("IN SWAP PAGE: %d\n", temp2);
+    printf("ACTIVE TID: %d\n", get_active_tid(page+3));
+
+    printf("\n-----Swapping Here-----\n");
+    swap_pages(page+3, 3, page+5);
+
+    memcpy(&temp1, &mem_block[FIRST_USER_PAGE + (page + 3) * PAGE_SIZE], sizeof(int));
+    memcpy(&temp2, &mem_block[FIRST_USER_PAGE + (page + 5) * PAGE_SIZE], sizeof(int));
+    printf("IN ACTIVE PAGE: %d\n", temp1);
+    printf("IN SWAP PAGE: %d\n", temp2);
+    printf("ACTIVE TID: %d\n", get_active_tid(page+3));
 }
 
 /*

@@ -74,13 +74,17 @@ block_meta * find_block_in_page(block_meta * blk_list, size_t x);
 void * myallocate(size_t x, char * file, int linenum, int tid_req);
 void mydeallocate(void * ptr, char * file, int linenum, int tid_req);
 
+int get_active_tid(int page);
+void swap_pages(int tid, int current_page, int target_page);
+
 unsigned long get_virtual_address(int num_pages,
                                   int tid, 
                                   unsigned long physical_address);
-void update_table(int has_block_meta, 
-                  int tid, 
-                  int page, 
-                  unsigned long physical_address);
+void update_table_entry(int tid, int page, int new_page);
+void update_table_address(int has_block_meta, 
+                          int tid, 
+                          int page, 
+                          unsigned long physical_address);
 void update_table_multi_page(int tid, 
                              int num_pages,
                              unsigned long physical_address);
