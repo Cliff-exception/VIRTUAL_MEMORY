@@ -1,5 +1,26 @@
 #include "myalloc.h"
+
+static void handler(int sig, siginfo_t *si, void *unused) {
+//    printf("Got SIGSEGV at address: 0x%lx\n",(long) si->si_addr);
+    int page = get_page_number_real_phy((unsigned long) si->si_addr);
+    printf("page: %d\n", page);
+    exit(EXIT_FAILURE);
+}
+
 void pages_init(){ //chunk mem into pages of 4kb
+    // Initialize signal handler.
+    struct sigaction sa;
+    sa.sa_flags = SA_SIGINFO;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_sigaction = handler;
+
+    if (sigaction(SIGSEGV, &sa, NULL) == -1)
+    {
+        printf("Fatal error setting up signal handler\n");
+        exit(EXIT_FAILURE);    //explode!
+    }
+
+    // Initialize memory.
     mem_block = (char*) memalign(sysconf(_SC_PAGE_SIZE), MEM_SIZE);
 
     int curr_page = NUM_PROCESSES + KERNEL_MEMORY;
@@ -266,6 +287,11 @@ void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
     return;
 }
 
+void memory_protect_page(int page) {
+    unsigned long address = (unsigned long)&mem_block[FIRST_USER_PAGE + (page * PAGE_SIZE)];
+    mprotect((void*) address, PAGE_SIZE, PROT_NONE);
+}
+
 //------------------------------------------------------------------------------
 //
 // Functions for placing and inspecting the top 11 bits of a physical memory
@@ -374,6 +400,14 @@ int get_upper_phy_mem_table(int tid, int page) {
 //------------------------------------------------------------------------------
 
 // Get the page number from the given physical address.
+int get_page_number_real_phy(unsigned long physical_address) {
+    physical_address = ((physical_address - 
+                        (unsigned long) mem_block) - 
+                        FIRST_USER_PAGE);
+    return physical_address / PAGE_SIZE;
+}
+
+// Get the page number from the given physical address.
 int get_page_number_phy(unsigned long physical_address) {
     physical_address = physical_address -
                        ( (unsigned long) &mem_block
@@ -443,6 +477,8 @@ int main() {
 
     printf("\n-----Swapping Here-----\n");
     swap_pages(page+3, 4, page+5);
+
+    memory_protect_page(page+3);
 
     memcpy(&temp1, &mem_block[FIRST_USER_PAGE + (page + 3) * PAGE_SIZE], sizeof(int));
     memcpy(&temp2, &mem_block[FIRST_USER_PAGE + (page + 5) * PAGE_SIZE], sizeof(int));

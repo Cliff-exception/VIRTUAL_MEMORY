@@ -8,7 +8,10 @@
 #include <assert.h>
 #include <string.h>
 #include <malloc.h>
+#include <sys/mman.h>
+#include <signal.h>
 
+#include <stdlib.h>
 #include <stdio.h>
 
 #define MEM_SIZE (8*1024*1024)
@@ -76,6 +79,7 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req);
 
 int get_active_tid(int page);
 void swap_pages(int tid, int current_page, int target_page);
+void memory_protect_page(int page);
 
 unsigned long get_virtual_address(int num_pages,
                                   int tid, 
@@ -92,6 +96,7 @@ int get_table_entry(int tid, int page);
 int contains_block_meta(int tid, int page);
 int get_upper_phy_mem_table(int tid, int page);
 
+int get_page_number_real_phy(unsigned long physical_address);
 int get_page_number_phy(unsigned long physical_address);
 int get_virtual_offset(unsigned long virtual_address);
 int get_physical_offset(unsigned long physical_address);
