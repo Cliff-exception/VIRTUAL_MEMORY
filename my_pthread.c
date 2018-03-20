@@ -376,9 +376,7 @@ int my_pthread_join(my_pthread_t thread, void **value_ptr) {
         my_pthread_yield(); 
     }
 
-
-    else {
-
+        // if the first statement is not true, we just simply join and grab return value
         return_value * ptr = return_list->head;
         return_value * prev = NULL; 
 
@@ -393,7 +391,7 @@ int my_pthread_join(my_pthread_t thread, void **value_ptr) {
 
         // no return value
         if ( ptr == NULL )
-            return; 
+            return 0; 
 
         // first element in the list
         if ( prev == NULL ) {
@@ -405,7 +403,7 @@ int my_pthread_join(my_pthread_t thread, void **value_ptr) {
                 return_list->head = NULL; 
                 return_list->tail = NULL;  
                 free(ptr); 
-                return; 
+                return 0; 
             }
 
             else {
@@ -414,7 +412,7 @@ int my_pthread_join(my_pthread_t thread, void **value_ptr) {
                 return_list->head = return_list->head->next; 
                 ptr->next = NULL; 
                 free(ptr); 
-                return; 
+                return 0; 
             }
         }
 
@@ -426,11 +424,11 @@ int my_pthread_join(my_pthread_t thread, void **value_ptr) {
             prev->next = ptr->next; 
             ptr->next = NULL; 
             free(ptr); 
-            return; 
+            return 0; 
         }
 
 
-    }
+
 
 
     return 0;
