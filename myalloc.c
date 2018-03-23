@@ -588,15 +588,20 @@ int get_upper_phy_mem(unsigned long physical_address) {
 
 // Build the virtual address to be passed on to user.
 unsigned long build_virtual_address(int page, int offset) {
-    unsigned long mem_base = (unsigned long) &mem_block & 
-                             0xFFFFFFFFFFFFF000;
-    return (unsigned long) ((page << 12) + mem_base + offset);
+//    unsigned long mem_base = (unsigned long) &mem_block & 
+//                             0xFFFFFFFFFFFFF000;
+
+    unsigned long virtual_address = (unsigned long) &mem_block[page * PAGE_SIZE + offset];
+    return virtual_address;
+
+//    return (unsigned long) ((page << 12) + mem_base + offset);
 }
 
 int main() {
     pages_init();
 
     int * my_nums1 = (int*) myallocate(20 * sizeof(int), NULL, 0, 5);
+    printf("PAGE MALLOC RETURNED: %d\n", get_page_number_virtual(my_nums1));
     printf("P1: %d\n", get_upper_phy_mem_table(5, 0));
 
     my_nums1[0] = 5;
