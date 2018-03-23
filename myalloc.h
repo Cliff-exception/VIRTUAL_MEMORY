@@ -16,8 +16,10 @@
 
 #define MEM_SIZE (8*1024*1024)
 #define PAGE_SIZE (4*1024)
-#define NUM_PROCESSES (100) // Needs to be even to prevent alignment problems.
-#define PAGE_TABLE_SIZE (2048 * NUM_PROCESSES)
+#define NUM_PROCESSES (49) // Needs to be odd to prevent alignment problems.
+#define OUT_OF_BOUNDS (-1)
+#define UNASSIGNED_IN_TABLE (-2)
+#define PAGE_TABLE_SIZE (2048 * (NUM_PROCESSES + 1) * 4) // Last page for used pages.
 #define KERNEL_MEMORY 32
 #define FIRST_USER_PAGE (PAGE_TABLE_SIZE + (KERNEL_MEMORY * PAGE_SIZE))
 #define NUM_USER_PAGES ((MEM_SIZE - (KERNEL_MEMORY * PAGE_SIZE) \
@@ -72,14 +74,18 @@ void pages_init();
 //page_meta * find_page(int tid);
 //void print_page_meta(page_meta * page);
 void print_blk_meta(block_meta * blk);
+block_meta * init_block_meta_page(int tid_req, int page, block_meta * prev, block_meta * next);
+block_meta * init_block_meta_page_zero(int tid_req);
 block_meta * find_block(int tid_req, size_t x);
 block_meta * find_block_in_page(block_meta * blk_list, size_t x);
 void * myallocate(size_t x, char * file, int linenum, int tid_req);
 void mydeallocate(void * ptr, char * file, int linenum, int tid_req);
 
 int get_active_tid(int page);
-void swap_pages(int tid, int current_page, int target_page);
+void swap_pages(int in_pos_page, int out_tid, int out_pos_page);
 void memory_protect_page(int page);
+void memory_unprotect_page(int page);
+int get_table_offset(int tid_req, int page);
 
 unsigned long get_virtual_address(int num_pages,
                                   int tid, 
@@ -95,6 +101,11 @@ void update_table_multi_page(int tid,
 int get_table_entry(int tid, int page);
 int contains_block_meta(int tid, int page);
 int get_upper_phy_mem_table(int tid, int page);
+
+int get_note_page_offset(int page);
+void note_page_used(int page);
+void note_page_unused(int page);
+int get_unused_page();
 
 int get_page_number_real_phy(unsigned long physical_address);
 int get_page_number_phy(unsigned long physical_address);

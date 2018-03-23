@@ -1,13 +1,16 @@
 #include "myalloc.h"
+#include "my_pthread_t.h"
 
 static void handler(int sig, siginfo_t *si, void *unused) {
 //    printf("Got SIGSEGV at address: 0x%lx\n",(long) si->si_addr);
     int page = get_page_number_real_phy((unsigned long) si->si_addr);
     printf("page: %d\n", page);
-    exit(EXIT_FAILURE);
+    memory_unprotect_page(page);
+    int tid = 5;
+    swap_pages(tid, page, 5);
 }
 
-void pages_init(){ //chunk mem into pages of 4kb
+void pages_init(){
     // Initialize signal handler.
     struct sigaction sa;
     sa.sa_flags = SA_SIGINFO;
@@ -23,26 +26,25 @@ void pages_init(){ //chunk mem into pages of 4kb
     // Initialize memory.
     mem_block = (char*) memalign(sysconf(_SC_PAGE_SIZE), MEM_SIZE);
 
-    int curr_page = NUM_PROCESSES + KERNEL_MEMORY;
-    size_t block_size = SWAP_PAGE - FIRST_USER_PAGE - 2*sizeof(block_meta);
+    // Update inverted page table to show that no pages have been assigned.
+    int out_of_bounds = OUT_OF_BOUNDS;
+    int i = 0;
+    for ( ; i < NUM_PROCESSES; i++)
+        memcpy(&mem_block[get_table_offset(i, 0)], &out_of_bounds, sizeof(int));
 
-    block_meta temp_block;
-    temp_block.p_type = UNASSIGNED;
-    temp_block.blk_size = block_size;
-    temp_block.free_size = block_size;
-    temp_block.tid = -1;
-    temp_block.prev = NULL;
-    temp_block.next = NULL;
-        
-    // copy to lower bound
-    memcpy(&mem_block[curr_page * PAGE_SIZE],
-           &temp_block,
-           sizeof(block_meta));
-        
-    //copy to upper bound
-    memcpy(&mem_block[SWAP_PAGE - sizeof(block_meta)],
-           &temp_block,
-           sizeof(block_meta)); 
+    int unassigned = UNASSIGNED_IN_TABLE;
+    i = 0;
+    int j;
+    for ( ; i < NUM_PROCESSES; i++) {
+        j = 1;
+        for ( ; j < NUM_USER_PAGES; j++) {
+            memcpy(&mem_block[get_table_offset(i, j)],
+                   &unassigned,
+                   sizeof(int));
+        }
+    }
+
+    return;
 }
 
 /* Tyson - Commenting out for time being, need to fix to work with memory mapping.
@@ -80,22 +82,81 @@ void print_blk_meta(block_meta * blk){
 
 }
 
-block_meta * find_block(int tid_req, size_t x) {
-     // Holds current page under inspection.
-    block_meta * temp  = (block_meta*) &mem_block[FIRST_USER_PAGE];
-    
-    // Look for a page that is used by the given tid_req.
-    while (temp->next != NULL) {
-        if (temp->p_type != UNASSIGNED && temp->tid == tid_req) {
-            block_meta * enough_room = find_block_in_page(temp, x);
-            if (enough_room != NULL)
-                return enough_room;
-        }
-    }
+block_meta * init_block_meta_page(int tid_req, int page, block_meta * prev, block_meta * next) {
+    size_t block_size = SWAP_PAGE -
+                        (FIRST_USER_PAGE + (page+1) * PAGE_SIZE);
 
-    return NULL;
+    block_meta temp_block;
+    temp_block.p_type = UNASSIGNED;
+    temp_block.blk_size = block_size;
+    temp_block.free_size = block_size;
+    temp_block.tid = tid_req;
+    temp_block.prev = prev;
+    temp_block.next = next;
+
+    block_meta * address = (block_meta *) 
+        &mem_block[FIRST_USER_PAGE + ((page+1) * PAGE_SIZE) - sizeof(block_meta)];
+
+    memcpy((void*)address, &temp_block, sizeof(block_meta));
+
+    return address;
 }
 
+block_meta * init_block_meta_page_zero(int tid_req) {
+    size_t block_size = SWAP_PAGE - FIRST_USER_PAGE - sizeof(block_meta);
+
+    block_meta temp_block;
+    temp_block.p_type = UNASSIGNED;
+    temp_block.blk_size = block_size;
+    temp_block.free_size = block_size;
+    temp_block.tid = tid_req;
+    temp_block.prev = NULL;
+    temp_block.next = NULL;
+
+    block_meta * address = (block_meta *) &mem_block[FIRST_USER_PAGE];
+
+    memcpy((void*)address, &temp_block, sizeof(block_meta));
+
+    return address;
+}
+
+block_meta * find_block(int tid_req, size_t x) {
+    // TODO: Make sure that if found block has an empty page, note empty page as used.
+
+    block_meta * b_meta = (block_meta *) &mem_block[FIRST_USER_PAGE];
+
+    int current_loc_page_zero = get_table_entry(tid_req, 0);
+    printf("FIND BLOCK TABLE ENTRY: %d\n", current_loc_page_zero);
+    if (current_loc_page_zero == OUT_OF_BOUNDS) {
+        printf("SHOULD BE HERE\n");
+        int unused_page = get_unused_page();
+        printf("UNUSED: %d\n", unused_page);
+        if (unused_page != 0) {
+            note_page_used(unused_page);
+            swap_pages(0, tid_req, unused_page);
+        }
+
+        note_page_used(0);
+
+        b_meta = init_block_meta_page_zero(tid_req);
+        return b_meta;
+    }
+
+    int active_tid = get_active_tid(0);
+//    if (active_tid != tid_req)
+//        swap_pages(tid_req, 0, get_upper_phy_mem_table(active_tid, 0));
+
+    while (b_meta->free_size < (sizeof(block_meta) + x)) {
+        if (b_meta->next == NULL)
+            return NULL;
+
+        b_meta = b_meta->next;
+    }
+
+    return b_meta;
+}
+
+/* UPDATE: No longer assign block met inside a single page.
 // given size x, find the first fit block in a list of blocks
 block_meta * find_block_in_page(block_meta * blk_list, size_t x){ 
     block_meta * temp = blk_list;
@@ -114,12 +175,15 @@ block_meta * find_block_in_page(block_meta * blk_list, size_t x){
     
     return NULL;
 }
+*/
 
 //void * myallocate(size_t x, __FILE__, __LINE__, THREADREQ){
 void * myallocate(size_t x, char * file, int linenum, int tid_req){
     
     assert(x>0);
-    if(tid_req == LIBRARYREQ){//maybe later
+    if(tid_req == LIBRARYREQ   ||  // maybe later
+       tid_req > NUM_PROCESSES ||
+       tid_req < 0 ) {
     
         return NULL;
     }
@@ -143,8 +207,8 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
 */  
     first_fit->p_type = DATA;
     block_meta * temp_addr = first_fit->next;
-    block_meta * old_upper = (block_meta *)((long)(first_fit + 1) + 
-                                            (first_fit->blk_size));
+    //block_meta * old_upper = (block_meta *)((long)(first_fit + 1) + 
+    //                                        (first_fit->blk_size));
     size_t old_size = first_fit -> blk_size;
     
     //(x + 2*sizeof(block_meta)); and points to the compliment of taken block
@@ -160,7 +224,7 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
     memcpy(first_fit->next, &new_block, sizeof(block_meta)); 
     
     //set the upper bound for a free block
-    old_upper->blk_size = new_block.blk_size;       
+    //old_upper->blk_size = new_block.blk_size;       
     
     // set the boundary tag for lower addr 
     first_fit -> blk_size = x;            
@@ -174,7 +238,8 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
     
     printf("\n\n\n\n");
 */
-    return (void *)( (unsigned long)first_fit + sizeof(block_meta) );
+    return (void *)( 
+        get_virtual_address(1, tid_req, ((unsigned long) first_fit) + sizeof(block_meta) ));
 }
 
 
@@ -263,6 +328,7 @@ int get_active_tid(int page) {
     int current_page;
     for ( ; i < NUM_PROCESSES; i++) {
         current_page = get_upper_phy_mem_table(i, page);
+        //printf("%d:%d\n", page, current_page);
         if (current_page == page)
             return i;
     }
@@ -271,8 +337,10 @@ int get_active_tid(int page) {
 }
 
 void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
+    printf("IP: %d, OT: %d, OP: %d\n", in_pos_page, out_tid, out_pos_page);
     int in_offset = FIRST_USER_PAGE + in_pos_page * PAGE_SIZE;
     int out_offset = FIRST_USER_PAGE + out_pos_page * PAGE_SIZE;
+    printf("IO: %d, OO: %d\n", ((in_offset - FIRST_USER_PAGE) / PAGE_SIZE), ((out_offset - FIRST_USER_PAGE) / PAGE_SIZE));
 
     // Swap pages within memory utilizing swap page location as pivot.
     memcpy(&mem_block[SWAP_PAGE], &mem_block[in_offset], PAGE_SIZE);
@@ -280,9 +348,13 @@ void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
     memcpy(&mem_block[out_offset], &mem_block[SWAP_PAGE], PAGE_SIZE);
 
     int in_tid = get_active_tid(in_pos_page);
+    printf("ACTIVE TID: %d\n", in_tid);
 
     update_table_entry(in_tid, in_pos_page, out_pos_page);
     update_table_entry(out_tid, in_pos_page, in_pos_page);
+
+    in_tid = get_active_tid(in_pos_page);
+    printf("NEW ACTIVE TID: %d\n", in_tid);
 
     return;
 }
@@ -290,6 +362,17 @@ void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
 void memory_protect_page(int page) {
     unsigned long address = (unsigned long)&mem_block[FIRST_USER_PAGE + (page * PAGE_SIZE)];
     mprotect((void*) address, PAGE_SIZE, PROT_NONE);
+}
+
+void memory_unprotect_page(int page) {
+    unsigned long address = (unsigned long)&mem_block[FIRST_USER_PAGE + (page
+        * PAGE_SIZE)];
+    mprotect((void*) address, PAGE_SIZE, PROT_READ | PROT_WRITE);
+}
+
+int get_table_offset(int tid_req, int page) {
+    int offset = (tid_req * NUM_USER_PAGES * sizeof(int) + page * sizeof(int));
+    return offset;
 }
 
 //------------------------------------------------------------------------------
@@ -305,7 +388,8 @@ void memory_protect_page(int page) {
 unsigned long get_virtual_address(int num_pages,
                                   int tid, 
                                   unsigned long physical_address) {
-    int page = get_page_number_phy(physical_address);
+    int page = get_page_number_real_phy(physical_address);
+    printf("PAGE NUM: %d\n", page);
     if (num_pages == 1)
         update_table_address(1, tid, page, physical_address);
     else
@@ -317,17 +401,22 @@ unsigned long get_virtual_address(int num_pages,
 // Update the page that is stored for a given tid inside the inverted page
 // table.
 void update_table_entry(int tid, int page, int new_page) {
-    int offset = tid * NUM_USER_PAGES + (page * sizeof(int));
+    int offset = get_table_offset(tid, page);
+//    int offset = tid * NUM_USER_PAGES + (page * sizeof(int));
 
     int has_block_meta  = contains_block_meta(tid, page);
 
     if (has_block_meta > 0)
         new_page = (1 << 12) + new_page;
 
+    printf("OLD: %d:%d\n", tid, mem_block[offset]);
     memcpy(&mem_block[offset], &new_page, sizeof(int));
+    printf("NEW: %d:%d\n", tid, mem_block[offset]);
 
     return;
 }
+
+
 
 // Peels off the upper bits of a physical address and stores it at the correct
 // position for the given tid and page inside an inverted page table.
@@ -335,7 +424,10 @@ void update_table_address(int has_block_meta,
                           int tid, 
                           int page, 
                           unsigned long physical_address) {
-    int offset = tid * NUM_USER_PAGES + (page * sizeof(int));
+    note_page_used(page);
+
+    //int offset = tid * NUM_USER_PAGES + (page * sizeof(int));
+    int offset = get_table_offset(tid, page);
 
     int table_entry = get_upper_phy_mem(physical_address);
 
@@ -355,7 +447,10 @@ void update_table_address(int has_block_meta,
 void update_table_multi_page(int tid, 
                              int num_pages,
                              unsigned long physical_address) {
-    int first_page = get_page_number_phy(physical_address);
+    int page = get_page_number_real_phy(physical_address);
+    printf("PAGE: %d\n", page);
+
+    int first_page = get_page_number_real_phy(physical_address);
     update_table_address(1, tid, first_page, physical_address);
 
     physical_address += PAGE_SIZE;
@@ -371,9 +466,11 @@ void update_table_multi_page(int tid,
 // Get the value held in the inverted page table for the given tid and page.
 int get_table_entry(int tid, int page) {
     int table_entry;
-    int offset = tid * NUM_USER_PAGES + (page * sizeof(int));
+    int offset = get_table_offset(tid, page);
 
     memcpy(&table_entry, &mem_block[offset], sizeof(int));
+
+    //printf("TABLE ENTRY: %d\n", table_entry);
 
     return table_entry;
 }
@@ -395,6 +492,41 @@ int get_upper_phy_mem_table(int tid, int page) {
 
 //------------------------------------------------------------------------------
 //
+// Functions that allow keeping track of which pages are currently being used
+// or free.
+//
+//------------------------------------------------------------------------------
+
+int get_note_page_offset(int page) {
+    return get_table_offset(NUM_PROCESSES, page);
+}
+
+void note_page_used(int page) {
+    int offset = get_note_page_offset(page);
+    int used = 1;
+    memcpy(&mem_block[offset], &used, sizeof(int));
+}
+
+void note_page_unused(int page) {
+    int offset = get_note_page_offset(page);
+    int used = 0;
+    memcpy(&mem_block[offset], &used, sizeof(int));
+}
+
+int get_unused_page() {
+    int i = 0;
+    int page_used;
+    for ( ; i < NUM_USER_PAGES; i++) {
+        memcpy(&page_used, &mem_block[get_note_page_offset(i)], sizeof(int));
+        if (!page_used)
+            return i;
+    }
+
+    return -1;
+}
+
+//------------------------------------------------------------------------------
+//
 // Functions for adding and demasking parts of a virtual memory address.
 //
 //------------------------------------------------------------------------------
@@ -404,17 +536,21 @@ int get_page_number_real_phy(unsigned long physical_address) {
     physical_address = ((physical_address - 
                         (unsigned long) mem_block) - 
                         FIRST_USER_PAGE);
+    int page_num = physical_address / PAGE_SIZE;
     return physical_address / PAGE_SIZE;
 }
 
+/*
 // Get the page number from the given physical address.
 int get_page_number_phy(unsigned long physical_address) {
     physical_address = physical_address -
                        ( (unsigned long) &mem_block
                                        + PAGE_TABLE_SIZE
                                        + (KERNEL_MEMORY * PAGE_SIZE) );
+    page_num = physical_address / PAGE_SIZE;
     return physical_address / PAGE_SIZE;
 }
+*/
 
 // Get the page number from the given virtual address.
 int get_page_number_virtual(unsigned long virtual_address) {
@@ -441,10 +577,12 @@ int get_physical_offset(unsigned long physical_address) {
 // Get the portion of physical memory address to be stored in inverted page
 // table.
 int get_upper_phy_mem(unsigned long physical_address) {
-    physical_address = physical_address -
-                       ( (unsigned long) &mem_block
-                                       + PAGE_TABLE_SIZE
-                                       + (KERNEL_MEMORY * PAGE_SIZE) );
+    physical_address = ((physical_address -
+                        (unsigned long) mem_block) -
+                        FIRST_USER_PAGE);
+//                       ( (unsigned long) &mem_block
+//                                      + PAGE_TABLE_SIZE
+//                                      + (KERNEL_MEMORY * PAGE_SIZE) );
     return (int) ((physical_address >> 12) & 0x7FF);
 }
 
@@ -455,6 +593,26 @@ unsigned long build_virtual_address(int page, int offset) {
     return (unsigned long) ((page << 12) + mem_base + offset);
 }
 
+int main() {
+    pages_init();
+
+    int * my_nums1 = (int*) myallocate(20 * sizeof(int), NULL, 0, 5);
+    printf("P1: %d\n", get_upper_phy_mem_table(5, 0));
+
+    my_nums1[0] = 5;
+    my_nums1[1] = 2;
+    printf("NUM 1: %d\n", my_nums1[0]);
+    printf("NUM 2: %d\n", my_nums1[1]);
+
+    swap_pages(0, 6, 2);
+
+    printf("NUM 1: %d\n", my_nums1[0]);
+    printf("NUM 2: %d\n", my_nums1[1]);
+
+    return;
+}
+
+/*
 int main() {
     pages_init();
     unsigned long test_address = ((unsigned long) &mem_block) + FIRST_USER_PAGE + 54097;
@@ -495,6 +653,7 @@ int main() {
     printf("IN SWAP PAGE: %d\n", temp2);
     printf("ACTIVE TID: %d\n", get_active_tid(page+3));
 }
+*/
 
 /*
 int main(){
