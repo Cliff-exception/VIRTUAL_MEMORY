@@ -30,6 +30,11 @@ void init_main () {
 }
 
 
+int get_curr_tid () {
+
+    return current_thread->tid; 
+}
+
 tcb * get_running_thread () {
 
     return current_thread;

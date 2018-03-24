@@ -135,23 +135,23 @@ block_meta * find_block(int tid_req, size_t x) {
     int current_loc_page_zero = get_table_entry(tid_req, 0);
     if (current_loc_page_zero == OUT_OF_BOUNDS) {
     
-    	b_meta = init_block_meta_page_zero(tid_req);
-    	
-    	next_meta = (block_meta *) &mem_block[FIRST_USER_PAGE + sizeof(block_meta) + x];
-    	max_page = ((unsigned long)(next_meta) + sizeof(block_meta) - (unsigned long)&mem_block[FIRST_USER_PAGE]) / PAGE_SIZE;
-    	
-    	b_meta		->next = next_meta;
-    	next_meta	->prev = b_meta;
-    	
-    	b_meta		->free_size = 0;
-    	next_meta	->free_size = next_meta->prev->free_size - x - sizeof(block_meta); //maybe the source of bug
-	
-	b_meta		->p_type = DATA;
-	next_meta	->p_type = UNASSIGNED;
-	
-	b_meta		->tid 	 = tid_req;
-	next_meta	->tid    = tid_req; 
-    	/*
+        b_meta = init_block_meta_page_zero(tid_req);
+        
+        next_meta = (block_meta *) &mem_block[FIRST_USER_PAGE + sizeof(block_meta) + x];
+        max_page = ((unsigned long)(next_meta) + sizeof(block_meta) - (unsigned long)&mem_block[FIRST_USER_PAGE]) / PAGE_SIZE;
+        
+        b_meta->next = next_meta;
+        next_meta->prev = b_meta;
+        
+        b_meta->free_size = 0;
+        next_meta->free_size = next_meta->prev->free_size - x - sizeof(block_meta); //maybe the source of bug
+    
+        b_meta->p_type = DATA;
+        next_meta->p_type = UNASSIGNED;
+    
+        b_meta->tid = tid_req;
+        next_meta->tid = tid_req; 
+        /*
         int unused_page = get_unused_page();
 
         if (unused_page != 0) {
@@ -159,18 +159,18 @@ block_meta * find_block(int tid_req, size_t x) {
             swap_pages(0, tid_req, unused_page);
         }
         note_page_used(0);
-	*/
-	
-	
-	
-	int i = 0;
-	int unused_page;
-	while(i<max_page){
-		unused_page= get_unused_page();
-		swap_pages(i, tid_req, unused_page);
-		i++;
-	}
-	
+    */
+    
+    
+    
+        int i = 0;
+        int unused_page;
+        while(i<max_page){
+            unused_page= get_unused_page();
+            swap_pages(i, tid_req, unused_page);
+            i++;
+        }
+    
        
         return b_meta;
     }
@@ -190,47 +190,47 @@ block_meta * find_block(int tid_req, size_t x) {
 }
 
 void protect_all_tid_pages(int tid){
-	/*
-	int curr_page = 0;
-	while(curr_page < NUM_USER_PAGES && 
-		UNASSIGNED_IN_TABLE != get_upper_phy_mem_table(tid, curr_page)){		
-		
-		memory_protect_page(curr_page);
-		curr_page++;
-	}
-	*/
-	
-	int curr_page = 0, prot_page;
-	while(curr_page < NUM_USER_PAGES){
-		prot_page = get_upper_phy_mem_table(tid, curr_page);
-		memory_protect_page(prot_page);
-		curr_page++;
-	}
+    /*
+    int curr_page = 0;
+    while(curr_page < NUM_USER_PAGES && 
+        UNASSIGNED_IN_TABLE != get_upper_phy_mem_table(tid, curr_page)){        
+        
+        memory_protect_page(curr_page);
+        curr_page++;
+    }
+    */
+    
+    int curr_page = 0, prot_page;
+    while(curr_page < NUM_USER_PAGES){
+        prot_page = get_upper_phy_mem_table(tid, curr_page);
+        memory_protect_page(prot_page);
+        curr_page++;
+    }
 }
 
 void unprotect_all_tid_pages(int tid){
-	/*
-	int curr_page = 0;
-	
-	while(curr_page < NUM_USER_PAGES && 
-		UNASSIGNED_IN_TABLE != get_upper_phy_mem_table(tid, curr_page)){		
-		
-		memory_unprotect_page(curr_page);
-		curr_page++;
-	}
-	*/
-	int curr_page = 0, prot_page;
-	while(curr_page < NUM_USER_PAGES){
-		prot_page = get_upper_phy_mem_table(tid, curr_page);
-		memory_unprotect_page(prot_page);
-		curr_page++;
-	}
-	
+    /*
+    int curr_page = 0;
+    
+    while(curr_page < NUM_USER_PAGES && 
+        UNASSIGNED_IN_TABLE != get_upper_phy_mem_table(tid, curr_page)){        
+        
+        memory_unprotect_page(curr_page);
+        curr_page++;
+    }
+    */
+    int curr_page = 0, prot_page;
+    while(curr_page < NUM_USER_PAGES){
+        prot_page = get_upper_phy_mem_table(tid, curr_page);
+        memory_unprotect_page(prot_page);
+        curr_page++;
+    }
+    
 }
 
 void swap_protection(int out_tid,int in_tid){
-	protect_all_tid_pages(out_tid);
-	unprotect_all_tid_pages(in_tid);
+    protect_all_tid_pages(out_tid);
+    unprotect_all_tid_pages(in_tid);
 }
 /* UPDATE: No longer assign block met inside a single page.
 // given size x, find the first fit block in a list of blocks
@@ -259,7 +259,7 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
     assert(x>0);
     if(tid_req == LIBRARYREQ ){  // maybe later
        
-    	return NULL;   
+        return NULL;   
     } 
     if(tid_req > NUM_PROCESSES ||
        tid_req < 0 ) {
@@ -671,16 +671,16 @@ unsigned long build_virtual_address(int page, int offset) {
 }
 
 unsigned long safely_align_block(unsigned long phy_addr){
-	unsigned long page_bound = (unsigned long)&mem_block + (get_page_number_real_phy(phy_addr)+1) * PAGE_SIZE;
-	unsigned long left = phy_addr, right = left+ sizeof(block_meta);
-	
-	if(left < page_bound && right > page_bound){
-		//shift
-		return page_bound;
-	
-	}
-	
-	return phy_addr;
+    unsigned long page_bound = (unsigned long)&mem_block + (get_page_number_real_phy(phy_addr)+1) * PAGE_SIZE;
+    unsigned long left = phy_addr, right = left+ sizeof(block_meta);
+    
+    if(left < page_bound && right > page_bound){
+        //shift
+        return page_bound;
+    
+    }
+    
+    return phy_addr;
 }
 
 int main() {
@@ -707,7 +707,7 @@ int main() {
 
 
 
-	
+    
     return 0;
 }
 

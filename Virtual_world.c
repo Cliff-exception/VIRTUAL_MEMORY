@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#define taken 4
 // define file descriptor for swapfile
 
 int swap_file_descriptor; 
@@ -54,6 +55,23 @@ int swap_space_init() {
         exit(EXIT_FAILURE);         
     }
 
+    // initialize the memory space
+    char buffer [8000000]; 
+    int write1 = write(swap_file_descriptor,buffer, 8000000);
+    int write2 = write(swap_file_descriptor,buffer, 8000000);  
+
+    printf("First write: %d\n", write1);
+    printf("Second write: %d\n", write2);
+
+
+    //lseek(swap_file_descriptor,0,SEEK_SET); 
+
+    int bytes = lseek(swap_file_descriptor, 0, SEEK_END); 
+
+    printf("size of swap_file : %d\n", bytes );
+
+
+
     // and we are done with setting up the swapfile, 
     // the swapfile grows each time we write to it so there is not need 
     // initialize size
@@ -64,11 +82,11 @@ int swap_space_init() {
     for testing purposes
     below is a test progran to show how lseek works
 */ 
-
-/*
+ /*
+    lseek(swap_file_descriptor,0,SEEK_SET); 
     char * c = "Hello"; 
 
-    write(swap_file_descriptor, c, strlen(c)); 
+    write(swap_filele_descriptor, c, strlen(c)); 
 
     lseek(swap_file_descriptor, 0, SEEK_SET);
 
@@ -94,12 +112,16 @@ int swap_space_init() {
 
     printf("%s\n", buff );
 
-    */
+                            */
 
 
     return 1; 
 
 }
+
+
+// given a 
+int store_in_memory 
 
 /*
 
@@ -109,7 +131,7 @@ to_mem_swap_offset: a pointer to the offset (in the swapfile) of the page being 
                     the pointer allows us to assign a new offset if the page does yet reside in the swapfile
 */
 
-int get_from_memory ( int to_mem_offset, int out_mem_offset, int * to_mem_swap_offset  ) {
+int get_from_memory ( int to_mem_offset, int out_mem_offset) {
 
     // buffer for the page we are reading from swapfile
     char from_mem[PAGE_SIZE]; 
@@ -178,6 +200,20 @@ int get_from_memory ( int to_mem_offset, int out_mem_offset, int * to_mem_swap_o
     // might need to modify metadata of pages
 
     return 1; 
+
+}
+
+void swap_page_int_table () {
+
+    
+}
+
+
+
+
+void protect_pages ( unsigned int in, unsigned int out ) {
+
+
 
 }
 
