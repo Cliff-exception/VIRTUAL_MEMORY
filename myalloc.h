@@ -61,9 +61,9 @@ typedef struct _PageData{
 
 typedef struct blk{
     page_type p_type;
-    size_t blk_size;
+    size_t blk_size; // ghost
     size_t free_size;
-    int tid;
+    int tid;		//ghost
 
     struct blk * prev;
     struct blk * next;
@@ -85,6 +85,8 @@ int get_active_tid(int page);
 void swap_pages(int in_pos_page, int out_tid, int out_pos_page);
 void memory_protect_page(int page);
 void memory_unprotect_page(int page);
+void protect_all_tid_pages(int tid);
+void unprotect_all_tid_pages(int tid);
 int get_table_offset(int tid_req, int page);
 
 unsigned long get_virtual_address(int num_pages,

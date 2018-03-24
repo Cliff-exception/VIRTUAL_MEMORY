@@ -120,22 +120,58 @@ block_meta * init_block_meta_page_zero(int tid_req) {
     return address;
 }
 
+
 block_meta * find_block(int tid_req, size_t x) {
     // TODO: Make sure that if found block has an empty page, note empty page as used.
 
     block_meta * b_meta = (block_meta *) &mem_block[FIRST_USER_PAGE];
-
+    //
+    block_meta * next_meta;
+    int max_page;
+    
+    
+    
+    //
     int current_loc_page_zero = get_table_entry(tid_req, 0);
     if (current_loc_page_zero == OUT_OF_BOUNDS) {
+    
+    	b_meta = init_block_meta_page_zero(tid_req);
+    	
+    	next_meta = (block_meta *) &mem_block[FIRST_USER_PAGE + sizeof(block_meta) + x];
+    	max_page = ((unsigned long)(next_meta) + sizeof(block_meta) - (unsigned long)&mem_block[FIRST_USER_PAGE]) / PAGE_SIZE;
+    	
+    	b_meta		->next = next_meta;
+    	next_meta	->prev = b_meta;
+    	
+    	b_meta		->free_size = 0;
+    	next_meta	->free_size = next_meta->prev->free_size - x - sizeof(block_meta); //maybe the source of bug
+	
+	b_meta		->p_type = DATA;
+	next_meta	->p_type = UNASSIGNED;
+	
+	b_meta		->tid 	 = tid_req;
+	next_meta	->tid    = tid_req; 
+    	/*
         int unused_page = get_unused_page();
+
         if (unused_page != 0) {
             note_page_used(unused_page);
             swap_pages(0, tid_req, unused_page);
         }
-
         note_page_used(0);
-
-        b_meta = init_block_meta_page_zero(tid_req);
+	*/
+	
+	
+	
+	int i = 0;
+	int unused_page;
+	while(i<max_page){
+		unused_page= get_unused_page();
+		swap_pages(i, tid_req, unused_page);
+		i++;
+	}
+	
+       
         return b_meta;
     }
 
@@ -153,6 +189,27 @@ block_meta * find_block(int tid_req, size_t x) {
     return b_meta;
 }
 
+void protect_all_tid_pages(int tid){
+	int prot_page, curr_page = 0;
+	
+	while(curr_page < NUM_USER_PAGES){		
+		if (UNASSIGNED_IN_TABLE != get_upper_phy_mem_table(tid, curr_page)){
+			memory_protect_page(curr_page);
+		}
+		curr_page++;
+	}
+}
+
+void unprotect_all_tid_pages(int tid){
+	int prot_page, curr_page = 0;
+	
+	while(curr_page < NUM_USER_PAGES){		
+		if (UNASSIGNED_IN_TABLE != get_upper_phy_mem_table(tid, curr_page)){
+			memory_unprotect_page(curr_page);
+		}
+		curr_page++;
+	}
+}
 /* UPDATE: No longer assign block met inside a single page.
 // given size x, find the first fit block in a list of blocks
 block_meta * find_block_in_page(block_meta * blk_list, size_t x){ 
@@ -178,8 +235,11 @@ block_meta * find_block_in_page(block_meta * blk_list, size_t x){
 void * myallocate(size_t x, char * file, int linenum, int tid_req){
     
     assert(x>0);
-    if(tid_req == LIBRARYREQ   ||  // maybe later
-       tid_req > NUM_PROCESSES ||
+    if(tid_req == LIBRARYREQ ){  // maybe later
+       
+    	return NULL;   
+    } 
+    if(tid_req > NUM_PROCESSES ||
        tid_req < 0 ) {
     
         return NULL;
@@ -202,6 +262,9 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
     printf("before malloc: \n");
     print_blk_meta(first_fit);
 */  
+
+
+
     first_fit->p_type = DATA;
     block_meta * temp_addr = first_fit->next;
     //block_meta * old_upper = (block_meta *)((long)(first_fit + 1) + 
@@ -235,8 +298,10 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
     
     printf("\n\n\n\n");
 */
+
     return (void *)( 
         get_virtual_address(1, tid_req, ((unsigned long) first_fit) + sizeof(block_meta) ));
+        
 }
 
 
@@ -580,6 +645,19 @@ unsigned long build_virtual_address(int page, int offset) {
         (unsigned long) &mem_block[FIRST_USER_PAGE + page * PAGE_SIZE + offset];
 }
 
+unsigned long safely_align_block(unsigned long phy_addr){
+	unsigned long page_bound = (unsigned long)&mem_block + (get_page_number_real_phy(phy_addr)+1) * PAGE_SIZE;
+	unsigned long left = phy_addr, right = left+ sizeof(block_meta);
+	
+	if(left < page_bound && right > page_bound){
+		//shift
+		return page_bound;
+	
+	}
+	
+	return phy_addr;
+}
+
 int main() {
     pages_init();
 
@@ -602,8 +680,12 @@ int main() {
     printf("NUM 1: %d\n", my_nums1[0]);
     printf("NUM 2: %d\n", my_nums1[1]);
 
-    return;
+
+
+	
+    return 0;
 }
+
 
 /*
 int main() {
