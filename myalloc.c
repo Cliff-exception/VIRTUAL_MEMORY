@@ -126,11 +126,8 @@ block_meta * find_block(int tid_req, size_t x) {
     block_meta * b_meta = (block_meta *) &mem_block[FIRST_USER_PAGE];
 
     int current_loc_page_zero = get_table_entry(tid_req, 0);
-    printf("FIND BLOCK TABLE ENTRY: %d\n", current_loc_page_zero);
     if (current_loc_page_zero == OUT_OF_BOUNDS) {
-        printf("SHOULD BE HERE\n");
         int unused_page = get_unused_page();
-        printf("UNUSED: %d\n", unused_page);
         if (unused_page != 0) {
             note_page_used(unused_page);
             swap_pages(0, tid_req, unused_page);
@@ -337,10 +334,8 @@ int get_active_tid(int page) {
 }
 
 void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
-    printf("IP: %d, OT: %d, OP: %d\n", in_pos_page, out_tid, out_pos_page);
     int in_offset = FIRST_USER_PAGE + in_pos_page * PAGE_SIZE;
     int out_offset = FIRST_USER_PAGE + out_pos_page * PAGE_SIZE;
-    printf("IO: %d, OO: %d\n", ((in_offset - FIRST_USER_PAGE) / PAGE_SIZE), ((out_offset - FIRST_USER_PAGE) / PAGE_SIZE));
 
     // Swap pages within memory utilizing swap page location as pivot.
     memcpy(&mem_block[SWAP_PAGE], &mem_block[in_offset], PAGE_SIZE);
@@ -348,13 +343,9 @@ void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
     memcpy(&mem_block[out_offset], &mem_block[SWAP_PAGE], PAGE_SIZE);
 
     int in_tid = get_active_tid(in_pos_page);
-    printf("ACTIVE TID: %d\n", in_tid);
 
     update_table_entry(in_tid, in_pos_page, out_pos_page);
     update_table_entry(out_tid, in_pos_page, in_pos_page);
-
-    in_tid = get_active_tid(in_pos_page);
-    printf("NEW ACTIVE TID: %d\n", in_tid);
 
     return;
 }
@@ -389,7 +380,6 @@ unsigned long get_virtual_address(int num_pages,
                                   int tid, 
                                   unsigned long physical_address) {
     int page = get_page_number_real_phy(physical_address);
-    printf("PAGE NUM: %d\n", page);
     if (num_pages == 1)
         update_table_address(1, tid, page, physical_address);
     else
@@ -409,9 +399,7 @@ void update_table_entry(int tid, int page, int new_page) {
     if (has_block_meta > 0)
         new_page = (1 << 12) + new_page;
 
-    printf("OLD: %d:%d\n", tid, mem_block[offset]);
     memcpy(&mem_block[offset], &new_page, sizeof(int));
-    printf("NEW: %d:%d\n", tid, mem_block[offset]);
 
     return;
 }
@@ -554,9 +542,9 @@ int get_page_number_phy(unsigned long physical_address) {
 
 // Get the page number from the given virtual address.
 int get_page_number_virtual(unsigned long virtual_address) {
-    unsigned long mem_base = (unsigned long) &mem_block & 
-                             0xFFFFFFFFFFFFF000;
-    return (int) (((virtual_address - mem_base) >> 12) & 0x7FF);
+    return (int) (virtual_address - 
+                   (unsigned long) &mem_block[FIRST_USER_PAGE]) / 
+                 PAGE_SIZE;
 }
 
 // Determine the offset inside a page that a memory address maps to.
@@ -588,28 +576,28 @@ int get_upper_phy_mem(unsigned long physical_address) {
 
 // Build the virtual address to be passed on to user.
 unsigned long build_virtual_address(int page, int offset) {
-//    unsigned long mem_base = (unsigned long) &mem_block & 
-//                             0xFFFFFFFFFFFFF000;
-
-    unsigned long virtual_address = (unsigned long) &mem_block[page * PAGE_SIZE + offset];
-    return virtual_address;
-
-//    return (unsigned long) ((page << 12) + mem_base + offset);
+    return 
+        (unsigned long) &mem_block[FIRST_USER_PAGE + page * PAGE_SIZE + offset];
 }
 
 int main() {
     pages_init();
 
     int * my_nums1 = (int*) myallocate(20 * sizeof(int), NULL, 0, 5);
-    printf("PAGE MALLOC RETURNED: %d\n", get_page_number_virtual(my_nums1));
-    printf("P1: %d\n", get_upper_phy_mem_table(5, 0));
 
     my_nums1[0] = 5;
     my_nums1[1] = 2;
     printf("NUM 1: %d\n", my_nums1[0]);
     printf("NUM 2: %d\n", my_nums1[1]);
 
+    printf("\nSwapping Pages\n\n");
     swap_pages(0, 6, 2);
+
+    printf("NUM 1: %d\n", my_nums1[0]);
+    printf("NUM 2: %d\n", my_nums1[1]);
+
+    printf("\nSwapping Pages\n\n");
+    swap_pages(0, 5, 2);
 
     printf("NUM 1: %d\n", my_nums1[0]);
     printf("NUM 2: %d\n", my_nums1[1]);
