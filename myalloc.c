@@ -6,8 +6,8 @@ static void handler(int sig, siginfo_t *si, void *unused) {
     int page = get_page_number_real_phy((unsigned long) si->si_addr);
     printf("page: %d\n", page);
     memory_unprotect_page(page);
-    int tid = 5;
-    swap_pages(tid, page, 5);
+    int tid = get_curr_tid();
+    swap_pages(tid, page, tid);
 }
 
 void pages_init(){
@@ -190,25 +190,47 @@ block_meta * find_block(int tid_req, size_t x) {
 }
 
 void protect_all_tid_pages(int tid){
-	int prot_page, curr_page = 0;
+	/*
+	int curr_page = 0;
+	while(curr_page < NUM_USER_PAGES && 
+		UNASSIGNED_IN_TABLE != get_upper_phy_mem_table(tid, curr_page)){		
+		
+		memory_protect_page(curr_page);
+		curr_page++;
+	}
+	*/
 	
-	while(curr_page < NUM_USER_PAGES){		
-		if (UNASSIGNED_IN_TABLE != get_upper_phy_mem_table(tid, curr_page)){
-			memory_protect_page(curr_page);
-		}
+	int curr_page = 0, prot_page;
+	while(curr_page < NUM_USER_PAGES){
+		prot_page = get_upper_phy_mem_table(tid, curr_page);
+		memory_protect_page(prot_page);
 		curr_page++;
 	}
 }
 
 void unprotect_all_tid_pages(int tid){
-	int prot_page, curr_page = 0;
+	/*
+	int curr_page = 0;
 	
-	while(curr_page < NUM_USER_PAGES){		
-		if (UNASSIGNED_IN_TABLE != get_upper_phy_mem_table(tid, curr_page)){
-			memory_unprotect_page(curr_page);
-		}
+	while(curr_page < NUM_USER_PAGES && 
+		UNASSIGNED_IN_TABLE != get_upper_phy_mem_table(tid, curr_page)){		
+		
+		memory_unprotect_page(curr_page);
 		curr_page++;
 	}
+	*/
+	int curr_page = 0, prot_page;
+	while(curr_page < NUM_USER_PAGES){
+		prot_page = get_upper_phy_mem_table(tid, curr_page);
+		memory_unprotect_page(prot_page);
+		curr_page++;
+	}
+	
+}
+
+void swap_protection(int out_tid,int in_tid){
+	protect_all_tid_pages(out_tid);
+	unprotect_all_tid_pages(in_tid);
 }
 /* UPDATE: No longer assign block met inside a single page.
 // given size x, find the first fit block in a list of blocks
@@ -399,6 +421,8 @@ int get_active_tid(int page) {
 }
 
 void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
+
+    memory_unprotect_page(in_pos_page);
     int in_offset = FIRST_USER_PAGE + in_pos_page * PAGE_SIZE;
     int out_offset = FIRST_USER_PAGE + out_pos_page * PAGE_SIZE;
 
@@ -407,6 +431,7 @@ void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
     memcpy(&mem_block[in_offset], &mem_block[out_offset], PAGE_SIZE);
     memcpy(&mem_block[out_offset], &mem_block[SWAP_PAGE], PAGE_SIZE);
 
+    memory_protect_page(out_pos_page);
     int in_tid = get_active_tid(in_pos_page);
 
     update_table_entry(in_tid, in_pos_page, out_pos_page);
