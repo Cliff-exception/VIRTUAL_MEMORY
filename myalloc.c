@@ -76,16 +76,10 @@ void print_page_meta(page_meta * page){
 void print_blk_meta(block_meta * blk){
 
     if(!blk) return;
-    printf("size lower: %d\n",blk->blk_size);
+    printf("blk size: %d\n", blk->blk_size);
+    printf("free size: %d\n", blk->free_size);
     
-    printf("size upper: %d\n",
-           ((block_meta *)(((long)blk) + 
-                           blk->blk_size +
-                           sizeof(block_meta)))->blk_size);
-    
-    printf("next block:\n");
     print_blk_meta(blk->next);
-
 }
 
 block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_meta * next) {
@@ -171,10 +165,16 @@ block_meta * find_block(int tid_req, size_t x) {
         
         b_meta->next = next_meta;
         next_meta->prev = b_meta;
+        next_meta->next = NULL;
         
+        
+        next_meta->free_size = next_meta->prev->free_size - x - sizeof(block_meta); //maybe the source of 
+        //printf("prev free size: %d, free size: %d\n",next_meta->prev->free_size, next_meta->free_size);
         b_meta->free_size = 0;
-        next_meta->free_size = next_meta->prev->free_size - x - sizeof(block_meta); //maybe the source of bug
-    
+        
+        next_meta->blk_size = next_meta->free_size;
+        b_meta->blk_size = x;
+            
         b_meta->p_type = DATA;
         next_meta->p_type = UNASSIGNED;
     
@@ -192,11 +192,12 @@ block_meta * find_block(int tid_req, size_t x) {
         }
         */
         
-        return b_meta;
+        return next_meta;
     }
 
-
+    
     while (b_meta->free_size < (sizeof(block_meta) + x)) {
+    	//printf("curr size: %d\n",b_meta->free_size);
         if (b_meta->next == NULL)
             return NULL;
 
@@ -277,11 +278,12 @@ block_meta * find_block_in_page(block_meta * blk_list, size_t x){
 //void * myallocate(size_t x, __FILE__, __LINE__, THREADREQ){
 void * myallocate(size_t x, char * file, int linenum, int tid_req){
     
+    
+    //print_blk_meta((block_meta*)&mem_block[FIRST_USER_PAGE]);
+    
     assert(x>0);
-    if(tid_req == LIBRARYREQ ){  // maybe later
-       
-        return NULL;   
-    } 
+    //if(tid_req == LIBRARYREQ ){return NULL;} 
+        // maybe later
     if(tid_req > NUM_PROCESSES ||
        tid_req < 0 ) {
     
@@ -311,9 +313,9 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
     	i++;
     }
     
-    
-    
-    return (void*) (first_fit + 1);
+   
+    print_blk_meta(first_fit->prev);
+    return (void*) (first_fit->prev + 1);
     
     
 /*  
@@ -367,14 +369,20 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
 
 //mydeallocate(x, __FILE__, __LINE__, THREADREQ)
 void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
+	block_meta * target = (block_meta *)ptr;
+	
+	target--;
+	target = target->next;
+	printf("||||||||||||||||||||||\n");
+	print_blk_meta(target);
+
+
+
+/*
     //assuming inputs are valid
     block_meta * lower_bound = (block_meta *)((long)ptr - sizeof(block_meta));
     block_meta * upper_bound = (block_meta *)((long)ptr + lower_bound->blk_size);
-    
-    /*
-    printf("before free the block:\n");
-    print_blk_meta(lower_bound);
-    */
+  
     
     lower_bound->p_type = UNASSIGNED;
     upper_bound->p_type = UNASSIGNED;
@@ -397,40 +405,27 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
         
         upper_bound = new_upper; // make a block logically contiguous
         
-        /*
-        printf("after coalescing:\n");
-        print_blk_meta(lower_bound);
-        */
+       
     }
     
     //coalescing with a lower free block
     if((lower_bound-1)->p_type == UNASSIGNED &&     
             ((((long)lower_bound) - (long)&mem_block)% PAGE_SIZE != 0 )){
-    
-        //(((long)lower_bound)% PAGE_SIZE != 0 )){ 
-        
-        //printf("lower_bound addr:%d\n",lower_bound);
-    
-        //printf("coalescing with a lower free block\n");
+  
         
         new_size =  lower_bound->blk_size + 
                     (lower_bound-1)->blk_size + 
                     2*sizeof(block_meta);
         block_meta * new_lower = (void *) ((long)(lower_bound - 1) - 
                                            (lower_bound-1)->blk_size);
-        
-//        printf("new size %d = %d + %d + 2*meta:%d\n",new_size, 
-//                                                     lower_bound -> blk_size ,
-//                                                     (lower_bound-1)->blk_size,
-//                                                     2*sizeof(block_meta));
+      
         upper_bound -> blk_size = new_size;
         new_lower   -> blk_size = new_size;
         new_lower   -> next     = upper_bound->next;
-        /*
-        printf("after coalescing:\n");
-        print_blk_meta(new_lower);
-        */
+   
     }
+    */
+    
     
 }
 
@@ -466,7 +461,10 @@ void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
     memory_unprotect_page(in_pos_page);
     int in_offset = FIRST_USER_PAGE + in_pos_page * PAGE_SIZE;
     int out_offset = FIRST_USER_PAGE + out_pos_page * PAGE_SIZE;
-
+    
+    //printf("IN_POS_PAGE : %d\n", in_offset);
+    //printf("OUT_POS_PAGE: %d\n", out_offset);
+	
     // Swap pages within memory utilizing swap page location as pivot.
     memcpy(&mem_block[SWAP_PAGE], &mem_block[in_offset], PAGE_SIZE);
     memcpy(&mem_block[in_offset], &mem_block[out_offset], PAGE_SIZE);
