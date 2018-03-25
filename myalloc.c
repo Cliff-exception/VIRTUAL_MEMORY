@@ -164,6 +164,7 @@ block_meta * find_block(int tid_req, size_t x) {
     int current_loc_page_zero = get_table_entry(tid_req, 0);
     if (current_loc_page_zero == OUT_OF_BOUNDS) {
     
+        align_pages(0, max_page, tid_req);
         b_meta = init_block_meta_page_zero(tid_req);
         
         next_meta = (block_meta *) &mem_block[FIRST_USER_PAGE + sizeof(block_meta) + x];
@@ -191,7 +192,6 @@ block_meta * find_block(int tid_req, size_t x) {
             i++;
         }
         */
-        align_pages(0,max_page,tid_req);
         
         return b_meta;
     }
