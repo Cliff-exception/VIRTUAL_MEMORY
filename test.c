@@ -52,7 +52,7 @@ void * test1() {
 		printf("Z[%d] = %d \n", j , z[j] );
 		j++; 
 	}
-
+free(x);
 
 	return NULL; 
 	/*int * x = (int*) myallocate(20, NULL, 0, 1);
