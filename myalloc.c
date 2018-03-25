@@ -448,7 +448,7 @@ int get_active_tid(int page) {
     int i = 0;
     int current_page;
     for ( ; i < NUM_PROCESSES; i++) {
-        current_page = get_upper_phy_mem_table(i, page);
+        current_page = get_table_entry(i, page);
         //printf("%d:%d\n", page, current_page);
         if (current_page == page)
             return i;
@@ -509,6 +509,7 @@ int get_table_offset(int tid_req, int page) {
 // Get a virtual address for the given physical address. Behind the scenes this
 // function updates the inverted page table to contain the necessary bits from
 // the given physical address.
+/*
 unsigned long get_virtual_address(int num_pages,
                                   int tid, 
                                   unsigned long physical_address) {
@@ -520,6 +521,7 @@ unsigned long get_virtual_address(int num_pages,
 
     return build_virtual_address(page, get_physical_offset(physical_address));
 }
+*/
 
 // Update the page that is stored for a given tid inside the inverted page
 // table.
@@ -554,7 +556,7 @@ void update_table_address(int has_block_meta,
     //int offset = tid * NUM_USER_PAGES + (page * sizeof(int));
     int offset = get_table_offset(tid, page);
 
-    int table_entry = get_upper_phy_mem(physical_address);
+    int table_entry = get_table_entry(tid, page);
 
     if (has_block_meta > 0)
         table_entry = (1 << 12) + table_entry;
@@ -608,12 +610,14 @@ int contains_block_meta(int tid, int page) {
     return table_entry >> 12;
 }
 
+/*
 // Get the upper_phy value that was stored in the inverted page table for
 // the given tid and page.
 int get_upper_phy_mem_table(int tid, int page) {
     int table_entry = get_table_entry(tid, page);
     return table_entry & 0xFFF;
 }
+*/
 
 //------------------------------------------------------------------------------
 //
@@ -677,20 +681,26 @@ int get_page_number_phy(unsigned long physical_address) {
 }
 */
 
+/*
 // Get the page number from the given virtual address.
 int get_page_number_virtual(unsigned long virtual_address) {
     return (int) (virtual_address - 
                    (unsigned long) &mem_block[FIRST_USER_PAGE]) / 
                  PAGE_SIZE;
 }
+*/
 
+/*
 // Determine the offset inside a page that a memory address maps to.
 // This function works to get offset from both virtual addresses and
 // physical addresses.
 int get_virtual_offset(unsigned long virtual_address) {
     return (int) (virtual_address & 0xFFF);
 }
+*/
 
+
+/*
 int get_physical_offset(unsigned long physical_address) {
     physical_address = physical_address -
                        ( (unsigned long) &mem_block
@@ -698,7 +708,9 @@ int get_physical_offset(unsigned long physical_address) {
                                        + (KERNEL_MEMORY * PAGE_SIZE) );
     return (int) (physical_address & 0xFFF);
 }
+*/
 
+/*
 // Get the portion of physical memory address to be stored in inverted page
 // table.
 int get_upper_phy_mem(unsigned long physical_address) {
@@ -712,10 +724,12 @@ int get_upper_phy_mem(unsigned long physical_address) {
 }
 
 // Build the virtual address to be passed on to user.
+/*
 unsigned long build_virtual_address(int page, int offset) {
     return 
         (unsigned long) &mem_block[FIRST_USER_PAGE + page * PAGE_SIZE + offset];
 }
+*/
 
 unsigned long safely_align_block(unsigned long phy_addr){
     unsigned long page_bound = (unsigned long)&mem_block + (get_page_number_real_phy(phy_addr)+1) * PAGE_SIZE;
