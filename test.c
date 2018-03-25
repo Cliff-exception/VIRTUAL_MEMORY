@@ -30,11 +30,11 @@ void * test1() {
 		i++; 
 	}
 
-	//my_pthread_yield(); 
+	my_pthread_yield(); 
 
 	printf("Thread 1 second array ************\n");
 	int * z = (int*)malloc(20*sizeof(int)); 
-	my_pthread_yield();
+	//my_pthread_yield();
 
 	int j = 0; 
 
@@ -84,10 +84,10 @@ void * test2() {
 		i++; 
 	}
 
-	//my_pthread_yield(); 
+	my_pthread_yield(); 
 	printf("Thread 2 second array ************\n");
 	int * z = (int*)malloc(20*sizeof(int)); 
-	my_pthread_yield();
+	//my_pthread_yield();
 
 	int j = 0; 
 
@@ -139,11 +139,11 @@ void * test3() {
 		i++; 
 	}
 
-	//my_pthread_yield(); 
+	my_pthread_yield(); 
 
 	printf("Thread 3 second array ************\n");
 	int * z = (int*)malloc(20*sizeof(int)); 
-	my_pthread_yield();
+	//my_pthread_yield();
 
 	int j = 0; 
 
@@ -195,11 +195,11 @@ void * test4 () {
 		i++; 
 	}
 
-	//my_pthread_yield(); 
+	my_pthread_yield(); 
 
 	printf("Thread 4 second array ************\n");
 	int * z = (int*)malloc(20*sizeof(int)); 
-	my_pthread_yield();
+	//my_pthread_yield();
 
 	int j = 0; 
 
