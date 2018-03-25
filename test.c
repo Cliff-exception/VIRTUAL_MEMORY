@@ -38,7 +38,7 @@ void * test2() {
 	int * x = (int *) malloc(20 * sizeof(int)); 
 
 	int i = 0; 
-	printf("Thread 2 ******************\n");
+	printf("Thread 2 first array ******************\n");
 	while ( i <= 10) {
 		x[i] = i*2; 
 		i++; 
@@ -50,6 +50,26 @@ void * test2() {
 
 		printf("X[%d] = %d \n", i, x[i] );
 		i++; 
+	}
+
+	printf("Thread 2 second array ************\n");
+	int * z = (int*)malloc(20*sizeof(int)); 
+
+	int j = 0; 
+
+	while ( j <= 10 ) {
+
+		z[j] = i*2; 
+		i++; 
+		j++;
+	}
+
+	j = 0; 
+
+	while ( j <= 10) {
+
+		printf("Z[%d] = %d \n", j , z[j] );
+		j++; 
 	}
 
 	return NULL; 
@@ -70,7 +90,7 @@ void * test3() {
 
 	int i = 0; 
 
-	printf("Thread 3 ******************\n");
+	printf("Thread 3 first array *******************\n");
 
 	while ( i <= 10) {
 		x[i] = i*3; 
@@ -83,6 +103,26 @@ void * test3() {
 
 		printf("X[%d] = %d \n", i, x[i] );
 		i++; 
+	}
+
+	printf("Thread 3 second array ************\n");
+	int * z = (int*)malloc(20*sizeof(int)); 
+
+	int j = 0; 
+
+	while ( j <= 10 ) {
+
+		z[j] = i*3; 
+		i++; 
+		j++;
+	}
+
+	j = 0; 
+
+	while ( j <= 10) {
+
+		printf("Z[%d] = %d \n", j , z[j] );
+		j++; 
 	}
 
 	return NULL; 
@@ -117,6 +157,26 @@ void * test4 () {
 		printf("X[%d] = %d \n", i, x[i] );
 		i++; 
 	}
+
+	printf("Thread 4 second array ************\n");
+	int * z = (int*)malloc(20*sizeof(int)); 
+
+	int j = 0; 
+
+	while ( j <= 10 ) {
+
+		z[j] = i*4; 
+		i++; 
+		j++;
+	}
+
+	j = 0; 
+
+	while ( j <= 10) {
+
+		printf("Z[%d] = %d \n", j , z[j] );
+		j++; 
+	}	
 
 	return NULL; 
 }
