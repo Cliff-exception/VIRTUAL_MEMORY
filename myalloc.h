@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define malloc(x) myallocate(x, __FILE__, __LINE__, get_curr_tid());
+#define free(x) mydeallocate(x, __FILE__, __LINE__, get_curr_tid());
+
 #define MEM_SIZE (8*1024*1024)
 #define PAGE_SIZE (4*1024)
 #define NUM_PROCESSES (49) // Needs to be odd to prevent alignment problems.

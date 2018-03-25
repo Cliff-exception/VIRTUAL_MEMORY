@@ -207,7 +207,7 @@ void protect_all_tid_pages(int tid){
     
     int curr_page = 0, prot_page;
     while(curr_page < NUM_USER_PAGES){
-        prot_page = get_upper_phy_mem_table(tid, curr_page);
+        prot_page = get_table_entry(tid, curr_page);
         memory_protect_page(prot_page);
         curr_page++;
     }
@@ -226,7 +226,7 @@ void unprotect_all_tid_pages(int tid){
     */
     int curr_page = 0, prot_page;
     while(curr_page < NUM_USER_PAGES){
-        prot_page = get_upper_phy_mem_table(tid, curr_page);
+        prot_page = get_table_entry(tid, curr_page);
         memory_unprotect_page(prot_page);
         curr_page++;
     }
@@ -444,6 +444,7 @@ int get_active_tid(int page) {
 }
 
 void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
+    //printf("%d : %d : %d\n", in_pos_page, out_tid, out_pos_page);
     //printf("IN_POS_PAGE : %d\n", in_pos_page);
     //printf("TID         : %d\n", out_tid);
     //printf("OUT_POS_PAGE: %d\n", out_pos_page);
@@ -458,6 +459,7 @@ void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
     memcpy(&mem_block[out_offset], &mem_block[SWAP_PAGE], PAGE_SIZE);
 
     memory_protect_page(out_pos_page);
+    memory_unprotect_page(in_pos_page);
     int in_tid = get_active_tid(in_pos_page);
 
     if (in_tid > -1)

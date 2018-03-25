@@ -3,7 +3,7 @@
 
 void * test1() {
 
-	int * x = (int *) myallocate(20,NULL, 0, 1); 
+	int * x = (int *) malloc(20 * sizeof(int)); 
 
 	int i = 0; 
 
@@ -35,7 +35,7 @@ void * test1() {
 }
 
 void * test2() {
-	int * x = (int *) myallocate(20,NULL, 0, 2); 
+	int * x = (int *) malloc(20 * sizeof(int)); 
 
 	int i = 0; 
 	printf("Thread 2 ******************\n");
@@ -66,7 +66,7 @@ void * test2() {
 
 void * test3() {
 
-	int * x = (int *) myallocate(20,NULL, 0, 3); 
+	int * x = (int *) malloc(20 * sizeof(int)); 
 
 	int i = 0; 
 
@@ -99,7 +99,7 @@ void * test3() {
 
 void * test4 () {
 
-	int * x = (int *) myallocate(20,NULL, 0, 4); 
+	int * x = (int *) malloc(20 * sizeof(int)); 
 
 	int i = 0; 
 
