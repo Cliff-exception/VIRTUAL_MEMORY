@@ -9,14 +9,14 @@ void * test1() {
 
 	printf("Thread 1 ******************\n");
 
-	while ( i <= 20) {
+	while ( i <= 10) {
 		x[i] = i; 
 		i++; 
 	}
 
 	i = 0; 
 
-	while (i <= 20) {
+	while (i <= 10) {
 
 		printf("X[%d] = %d \n", i, x[i] );
 		i++; 
@@ -39,14 +39,14 @@ void * test2() {
 
 	int i = 0; 
 	printf("Thread 2 ******************\n");
-	while ( i <= 20) {
-		x[i] = i; 
+	while ( i <= 10) {
+		x[i] = i*2; 
 		i++; 
 	}
 
 	i = 0; 
 
-	while (i <= 20) {
+	while (i <= 10) {
 
 		printf("X[%d] = %d \n", i, x[i] );
 		i++; 
@@ -72,14 +72,14 @@ void * test3() {
 
 	printf("Thread 3 ******************\n");
 
-	while ( i <= 20) {
-		x[i] = i; 
+	while ( i <= 10) {
+		x[i] = i*3; 
 		i++; 
 	}
 
 	i = 0; 
 
-	while (i <= 20) {
+	while (i <= 10) {
 
 		printf("X[%d] = %d \n", i, x[i] );
 		i++; 
@@ -105,14 +105,14 @@ void * test4 () {
 
 	printf("Thread 4 ******************\n");
 
-	while ( i <= 20) {
-		x[i] = i; 
+	while ( i <= 10) {
+		x[i] = i*4; 
 		i++; 
 	}
 
 	i = 0; 
 
-	while (i <= 20) {
+	while (i <= 10) {
 
 		printf("X[%d] = %d \n", i, x[i] );
 		i++; 
