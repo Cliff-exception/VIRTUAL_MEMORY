@@ -1,13 +1,21 @@
 #include "myalloc.h"
 #include "my_pthread_t.h"   // Order matters, don't switch myalloc with pthread!
 
+
+
+/*void * str_test () {
+
+	char * x = (char*)malloc(sizeof(char)*6000); 
+
+}
+*/
 void * test1() {
 
 	int * x = (int *) malloc(20 * sizeof(int)); 
 
 	int i = 0; 
 
-	printf("Thread 1 ******************\n");
+	printf("Thread 1 First Array ******************\n");
 
 	while ( i <= 10) {
 		x[i] = i; 
@@ -21,6 +29,30 @@ void * test1() {
 		printf("X[%d] = %d \n", i, x[i] );
 		i++; 
 	}
+
+	//my_pthread_yield(); 
+
+	printf("Thread 1 second array ************\n");
+	int * z = (int*)malloc(20*sizeof(int)); 
+	my_pthread_yield();
+
+	int j = 0; 
+
+	while ( j <= 10 ) {
+
+		z[j] = i; 
+		i++; 
+		j++;
+	}
+
+	j = 0; 
+
+	while ( j <= 10) {
+
+		printf("Z[%d] = %d \n", j , z[j] );
+		j++; 
+	}
+
 
 	return NULL; 
 	/*int * x = (int*) myallocate(20, NULL, 0, 1);
@@ -52,8 +84,10 @@ void * test2() {
 		i++; 
 	}
 
+	//my_pthread_yield(); 
 	printf("Thread 2 second array ************\n");
 	int * z = (int*)malloc(20*sizeof(int)); 
+	my_pthread_yield();
 
 	int j = 0; 
 
@@ -105,8 +139,11 @@ void * test3() {
 		i++; 
 	}
 
+	//my_pthread_yield(); 
+
 	printf("Thread 3 second array ************\n");
 	int * z = (int*)malloc(20*sizeof(int)); 
+	my_pthread_yield();
 
 	int j = 0; 
 
@@ -158,8 +195,11 @@ void * test4 () {
 		i++; 
 	}
 
+	//my_pthread_yield(); 
+
 	printf("Thread 4 second array ************\n");
 	int * z = (int*)malloc(20*sizeof(int)); 
+	my_pthread_yield();
 
 	int j = 0; 
 
