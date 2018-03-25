@@ -276,7 +276,7 @@ void schedule_threads () {
     else {
 
         current_thread = to_run; 
-        swap_protection(-1, to_run->tid); 
+        swap_protection(temp_id, to_run->tid); 
         setcontext(to_run->thread_context); 
     }
 

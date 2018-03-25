@@ -4,11 +4,16 @@
 static void handler(int sig, siginfo_t *si, void *unused) {
 //    printf("Got SIGSEGV at address: 0x%lx\n",(long) si->si_addr);
     int page = get_page_number_real_phy((unsigned long) si->si_addr);
-    printf("sigsegv page: %d\n", page);
-    printf("TID: %d\n", get_curr_tid());
+//    printf("sigsegv page: %d\n", page);
+//    printf("TID: %d\n", get_curr_tid());
     int tid = get_curr_tid();
-    printf("Sigsegv calling swap!\n");
-    swap_pages(page, tid, get_table_entry(tid, page));
+//    printf("Sigsegv calling swap!\n");
+    int table_entry = get_table_entry(tid, page);
+
+    if (table_entry < 0)
+        swap_pages(page, tid, get_unused_page());
+    else
+        swap_pages(page, tid, get_table_entry(tid, page));
 }
 
 void pages_init(){
@@ -442,9 +447,9 @@ int get_active_tid(int page) {
 }
 
 void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
-    printf("IN_POS_PAGE : %d\n", in_pos_page);
-    printf("TID         : %d\n", out_tid);
-    printf("OUT_POS_PAGE: %d\n", out_pos_page);
+    //printf("IN_POS_PAGE : %d\n", in_pos_page);
+    //printf("TID         : %d\n", out_tid);
+    //printf("OUT_POS_PAGE: %d\n", out_pos_page);
 
     memory_unprotect_page(in_pos_page);
     int in_offset = FIRST_USER_PAGE + in_pos_page * PAGE_SIZE;
