@@ -25,6 +25,8 @@ void init_main () {
     getcontext(main_block->thread_context); 
     current_thread = main_block; 
 
+    pages_init();
+
     // add main block to the queue of threads
    // Insert_to_qeueue(main_block); 
 }
@@ -263,6 +265,7 @@ void schedule_threads () {
 
        // printf("Swaping context between thread %d  and thread %d\n", context->tid, to_run->tid );
 
+        swap_protection(context->tid, to_run->tid);
         swapcontext(context->thread_context, to_run->thread_context); 
     }
 

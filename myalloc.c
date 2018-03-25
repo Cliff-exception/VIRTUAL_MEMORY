@@ -4,6 +4,7 @@
 static void handler(int sig, siginfo_t *si, void *unused) {
 //    printf("Got SIGSEGV at address: 0x%lx\n",(long) si->si_addr);
     int page = get_page_number_real_phy((unsigned long) si->si_addr);
+    printf("TID: %d\n", get_curr_tid());
     int tid = get_curr_tid();
     swap_pages(page, tid, get_upper_phy_mem_table(tid, page));
 }
@@ -681,6 +682,7 @@ unsigned long safely_align_block(unsigned long phy_addr){
     return phy_addr;
 }
 
+/*
 int main() {
     pages_init();
 
@@ -708,7 +710,7 @@ int main() {
     
     return 0;
 }
-
+*/
 
 /*
 int main() {

@@ -1,8 +1,6 @@
 #ifndef MYALLOC_H
 #define MYALLOC_H
 
-
-
 #include <pthread.h>
 #include <unistd.h>
 #include <assert.h>
