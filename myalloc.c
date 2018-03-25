@@ -145,7 +145,7 @@ block_meta * find_block(int tid_req, size_t x) {
         b_meta = init_block_meta_page_zero(tid_req);
         
         next_meta = (block_meta *) &mem_block[FIRST_USER_PAGE + sizeof(block_meta) + x];
-        max_page = ((unsigned long)(next_meta) + sizeof(block_meta) - (unsigned long)&mem_block[FIRST_USER_PAGE]) / PAGE_SIZE;
+        max_page = ((unsigned long)(next_meta) + sizeof(block_meta) - (unsigned long)&mem_block[FIRST_USER_PAGE]) / PAGE_SIZE + 1;
         
         b_meta->next = next_meta;
         next_meta->prev = b_meta;
@@ -169,10 +169,11 @@ block_meta * find_block(int tid_req, size_t x) {
     */
     
     
-    
+    	printf("max_page: %d\n",max_page);
+    	
         int i = 0;
         int unused_page;
-        while(i<max_page){
+        while(i < max_page){
             unused_page= get_unused_page();
             swap_pages(i, tid_req, unused_page);
             i++;
