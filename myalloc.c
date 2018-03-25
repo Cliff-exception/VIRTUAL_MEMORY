@@ -231,7 +231,10 @@ void unprotect_all_tid_pages(int tid){
 }
 
 void swap_protection(int out_tid,int in_tid){
+    
+    if ( out_tid != -1 )
     protect_all_tid_pages(out_tid);
+
     unprotect_all_tid_pages(in_tid);
 }
 /* UPDATE: No longer assign block met inside a single page.

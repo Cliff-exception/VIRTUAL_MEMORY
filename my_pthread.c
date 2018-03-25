@@ -159,10 +159,14 @@ int my_pthread_yield() {
 
 void schedule_threads () {
 
+    my_pthread_t temp_id; 
+
     struct itimerval timer; 
     struct sigaction interrupt; 
 
     tcb * context = get_running_thread(); 
+
+    temp_id = context->tid; 
 
     //update the time quanta and modify priorities
 
@@ -272,6 +276,7 @@ void schedule_threads () {
     else {
 
         current_thread = to_run; 
+        swap_protection(-1, to_run->tid); 
         setcontext(to_run->thread_context); 
     }
 
