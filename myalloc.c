@@ -169,10 +169,11 @@ block_meta * find_block(int tid_req, size_t x) {
     */
     
     
-    
+    	printf("max_page: %d\n",max_page);
+    	
         int i = 0;
         int unused_page;
-        while(i<max_page){
+        while(i < max_page){
             unused_page= get_unused_page();
             swap_pages(i, tid_req, unused_page);
             i++;
