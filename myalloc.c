@@ -88,9 +88,8 @@ void print_blk_meta(block_meta * blk){
 
 }
 
-block_meta * init_block_meta_page(int tid_req, int page, block_meta * prev, block_meta * next) {
-    size_t block_size = SWAP_PAGE -
-                        (FIRST_USER_PAGE + (page+1) * PAGE_SIZE);
+block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_meta * next) {
+    size_t block_size = prev->free_size - x - sizeof(block_meta);
 
     block_meta temp_block;
     temp_block.p_type = UNASSIGNED;
@@ -99,11 +98,28 @@ block_meta * init_block_meta_page(int tid_req, int page, block_meta * prev, bloc
     temp_block.tid = tid_req;
     temp_block.prev = prev;
     temp_block.next = next;
-
-    block_meta * address = (block_meta *) 
-        &mem_block[FIRST_USER_PAGE + ((page+1) * PAGE_SIZE) - sizeof(block_meta)];
-
+    
+    
+    block_meta * address = (block_meta *) ((unsigned long)prev + x + sizeof(block_meta));
+    
+    address = (block_meta *)safely_align_block((unsigned long)address);
+    if(((unsigned long)address - (unsigned long)(prev) + sizeof(block_meta)) >= prev->free_size){
+    	
+    	prev->free_size = 0;
+    	return prev;
+    }
+     
+    int page = get_page_number_real_phy((unsigned long)address);
+    
+    if(get_table_entry(tid_req,page)<0)
+    	swap_pages(page,tid_req,get_unused_page());
+    else
+    	swap_pages(page,tid_req,get_table_entry(tid_req,page));
+    
     memcpy((void*)address, &temp_block, sizeof(block_meta));
+    
+    next->prev = address;
+    prev->next = address;
 
     return address;
 }
@@ -126,19 +142,25 @@ block_meta * init_block_meta_page_zero(int tid_req) {
 
     return address;
 }
-
+void align_pages(int page1, int page2, int tid_req){
+	int i = page1;
+        int unused_page;
+        while(i < page2){
+            unused_page= get_unused_page();
+            swap_pages(i, tid_req, unused_page);
+            i++;
+        }
+        
+}
 
 block_meta * find_block(int tid_req, size_t x) {
     // TODO: Make sure that if found block has an empty page, note empty page as used.
 
     block_meta * b_meta = (block_meta *) &mem_block[FIRST_USER_PAGE];
-    //
     block_meta * next_meta;
     int max_page;
     
     
-    
-    //
     int current_loc_page_zero = get_table_entry(tid_req, 0);
     if (current_loc_page_zero == OUT_OF_BOUNDS) {
     
@@ -158,19 +180,9 @@ block_meta * find_block(int tid_req, size_t x) {
     
         b_meta->tid = tid_req;
         next_meta->tid = tid_req; 
-        /*
-        int unused_page = get_unused_page();
-
-        if (unused_page != 0) {
-            note_page_used(unused_page);
-            swap_pages(0, tid_req, unused_page);
-        }
-        note_page_used(0);
-    */
-    
-    
-    	printf("max_page: %d\n",max_page);
-    	
+        
+        
+    	/*
         int i = 0;
         int unused_page;
         while(i < max_page){
@@ -178,8 +190,9 @@ block_meta * find_block(int tid_req, size_t x) {
             swap_pages(i, tid_req, unused_page);
             i++;
         }
-    
-       
+        */
+        align_pages(0,max_page,tid_req);
+        
         return b_meta;
     }
 
@@ -190,8 +203,10 @@ block_meta * find_block(int tid_req, size_t x) {
 
         b_meta = b_meta->next;
     }
-
-    return b_meta;
+    
+    block_meta * new_meta = init_block_meta_page(tid_req, x, b_meta->prev, b_meta->next);
+    
+    return new_meta;
 }
 
 void protect_all_tid_pages(int tid){

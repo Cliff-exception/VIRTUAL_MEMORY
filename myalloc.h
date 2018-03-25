@@ -75,7 +75,7 @@ void pages_init();
 //page_meta * find_page(int tid);
 //void print_page_meta(page_meta * page);
 void print_blk_meta(block_meta * blk);
-block_meta * init_block_meta_page(int tid_req, int page, block_meta * prev, block_meta * next);
+block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_meta * next);
 block_meta * init_block_meta_page_zero(int tid_req);
 block_meta * find_block(int tid_req, size_t x);
 block_meta * find_block_in_page(block_meta * blk_list, size_t x);
@@ -117,5 +117,6 @@ int get_physical_offset(unsigned long physical_address);
 int get_upper_phy_mem(unsigned long physical_address);
 int get_page_number_virtual(unsigned long virtual_address);
 unsigned long build_virtual_address(int page, int offset);
+unsigned long safely_align_block(unsigned long phy_addr);
 
 #endif
