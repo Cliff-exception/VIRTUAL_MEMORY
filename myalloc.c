@@ -4,9 +4,11 @@
 static void handler(int sig, siginfo_t *si, void *unused) {
 //    printf("Got SIGSEGV at address: 0x%lx\n",(long) si->si_addr);
     int page = get_page_number_real_phy((unsigned long) si->si_addr);
+    printf("sigsegv page: %d\n", page);
     printf("TID: %d\n", get_curr_tid());
     int tid = get_curr_tid();
-    swap_pages(page, tid, get_upper_phy_mem_table(tid, page));
+    printf("Sigsegv calling swap!\n");
+    swap_pages(page, tid, get_table_entry(tid, page));
 }
 
 void pages_init(){
@@ -114,6 +116,7 @@ block_meta * init_block_meta_page_zero(int tid_req) {
 
     block_meta * address = (block_meta *) &mem_block[FIRST_USER_PAGE];
 
+    swap_pages(0, tid_req, get_unused_page());
     memcpy((void*)address, &temp_block, sizeof(block_meta));
 
     return address;
@@ -420,6 +423,9 @@ int get_active_tid(int page) {
 }
 
 void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
+    printf("IN_POS_PAGE : %d\n", in_pos_page);
+    printf("TID         : %d\n", out_tid);
+    printf("OUT_POS_PAGE: %d\n", out_pos_page);
 
     memory_unprotect_page(in_pos_page);
     int in_offset = FIRST_USER_PAGE + in_pos_page * PAGE_SIZE;
@@ -433,7 +439,8 @@ void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
     memory_protect_page(out_pos_page);
     int in_tid = get_active_tid(in_pos_page);
 
-    update_table_entry(in_tid, in_pos_page, out_pos_page);
+    if (in_tid > -1)
+      update_table_entry(in_tid, in_pos_page, out_pos_page);
     update_table_entry(out_tid, in_pos_page, in_pos_page);
 
     return;
@@ -483,10 +490,10 @@ void update_table_entry(int tid, int page, int new_page) {
     int offset = get_table_offset(tid, page);
 //    int offset = tid * NUM_USER_PAGES + (page * sizeof(int));
 
-    int has_block_meta  = contains_block_meta(tid, page);
+//    int has_block_meta  = contains_block_meta(tid, page);
 
-    if (has_block_meta > 0)
-        new_page = (1 << 12) + new_page;
+//    if (has_block_meta > 0)
+//        new_page = (1 << 12) + new_page;
 
     memcpy(&mem_block[offset], &new_page, sizeof(int));
 
@@ -591,7 +598,7 @@ void note_page_unused(int page) {
 }
 
 int get_unused_page() {
-    int i = 0;
+    int i = 1;
     int page_used;
     for ( ; i < NUM_USER_PAGES; i++) {
         memcpy(&page_used, &mem_block[get_note_page_offset(i)], sizeof(int));
