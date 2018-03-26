@@ -142,9 +142,13 @@ void align_pages(int page1, int page2, int tid_req){
         while(i < page2){
             unused_page= get_unused_page();
             swap_pages(i, tid_req, unused_page);
+            printf("I: %d\n", i);
             i++;
         }
         
+        i = page1;
+        for ( ; i < page2; i++)
+            printf("ENTRY: %d\n", get_table_entry(tid_req, i));
 }
 
 block_meta * find_block(int tid_req, size_t x) {
@@ -308,8 +312,8 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
     int page = get_page_number_real_phy((unsigned long)first_fit);
     int f = (x + 2 *sizeof(block_meta))/ PAGE_SIZE + 1;
     while(i < f){
- 	note_page_used(page+i);
- 	update_table_entry(tid_req,page+i,page+i);
+ 	    update_table_entry(tid_req,page+i,page+i);
+        note_page_used(page+i);
     	i++;
     }
     
@@ -475,7 +479,7 @@ void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
     int in_tid = get_active_tid(in_pos_page);
 
     if (in_tid > -1)
-      update_table_entry(in_tid, in_pos_page, out_pos_page);
+        update_table_entry(in_tid, in_pos_page, out_pos_page);
     update_table_entry(out_tid, in_pos_page, in_pos_page);
 
     return;
@@ -641,7 +645,7 @@ void note_page_unused(int page) {
 }
 
 int get_unused_page() {
-    int i = 1;
+    int i = 0;
     int page_used;
     for ( ; i < NUM_USER_PAGES; i++) {
         memcpy(&page_used, &mem_block[get_note_page_offset(i)], sizeof(int));
