@@ -21,11 +21,13 @@
 #define OUT_OF_BOUNDS (-1)
 #define UNASSIGNED_IN_TABLE (-2)
 #define PAGE_TABLE_SIZE (2048 * (NUM_PROCESSES + 3) * 4) // Last page for used pages.
-#define KERNEL_MEMORY 32
-#define FIRST_USER_PAGE (PAGE_TABLE_SIZE + (KERNEL_MEMORY * PAGE_SIZE))
-#define NUM_USER_PAGES ((MEM_SIZE - (KERNEL_MEMORY * PAGE_SIZE) \
-                                  - (PAGE_TABLE_SIZE))          \
-                         / PAGE_SIZE)
+//#define KERNEL_MEMORY 32
+//#define FIRST_USER_PAGE (PAGE_TABLE_SIZE + (KERNEL_MEMORY * PAGE_SIZE))
+#define FIRST_USER_PAGE (PAGE_TABLE_SIZE)
+//#define NUM_USER_PAGES ((MEM_SIZE - (KERNEL_MEMORY * PAGE_SIZE) \
+//                                  - (PAGE_TABLE_SIZE))          \
+//                         / PAGE_SIZE)
+#define NUM_USER_PAGES ((MEM_SIZE - (PAGE_TABLE_SIZE)) / PAGE_SIZE)
 #define SWAP_PAGE (FIRST_USER_PAGE + (NUM_USER_PAGES * PAGE_SIZE))
 #define LIBRARYREQ -1
 //#define THREADREQ 1
