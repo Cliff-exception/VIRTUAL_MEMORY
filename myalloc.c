@@ -2,18 +2,26 @@
 #include "my_pthread_t.h"
 
 static void handler(int sig, siginfo_t *si, void *unused) {
-//    printf("Got SIGSEGV at address: 0x%lx\n",(long) si->si_addr);
-    int page = get_page_number_real_phy((unsigned long) si->si_addr);
-//    printf("sigsegv page: %d\n", page);
-//    printf("TID: %d\n", get_curr_tid());
-    int tid = get_curr_tid();
-//    printf("Sigsegv calling swap!\n");
-    int table_entry = get_table_entry(tid, page);
+    //if (si->si_addr > &mem_block && si->si_addr < &mem_block + MEM_SIZE) {
+        printf("Got SIGSEGV at address: 0x%lx\n",(long) si->si_addr);
+        int page = get_page_number_real_phy((unsigned long) si->si_addr);
+        printf("sigsegv page: %d\n", page);
+    //    printf("TID: %d\n", get_curr_tid());
+        int tid = get_curr_tid();
+    //    printf("Sigsegv calling swap!\n");
+        int table_entry = get_table_entry(tid, page);
 
-    if (table_entry < 0)
-        swap_pages(page, tid, get_unused_page());
-    else
-        swap_pages(page, tid, get_table_entry(tid, page));
+        if (table_entry < 0)
+            swap_pages(page, tid, get_unused_page());
+        else
+            swap_pages(page, tid, get_table_entry(tid, page));
+    //}
+    /*
+    else {
+        printf("Real segfault!\n");
+        exit(1);
+    }
+    */
 }
 
 void pages_init(){
@@ -83,7 +91,8 @@ void print_blk_meta(block_meta * blk){
 }
 
 block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_meta * next) {
-    size_t block_size = prev->free_size - x - sizeof(block_meta);
+    //size_t block_size = prev->free_size - x - sizeof(block_meta);
+    size_t block_size = x + sizeof(block_meta);
 
     block_meta temp_block;
     temp_block.p_type = UNASSIGNED;
@@ -95,24 +104,23 @@ block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_m
     
     
     block_meta * address = (block_meta *) ((unsigned long)prev + x + sizeof(block_meta));
-    
     address = (block_meta *)safely_align_block((unsigned long)address);
     if(((unsigned long)address - (unsigned long)(prev) + sizeof(block_meta)) >= prev->free_size){
-    	
     	prev->free_size = 0;
     	return prev;
     }
-     
+
     int page = get_page_number_real_phy((unsigned long)address);
     
     if(get_table_entry(tid_req,page)<0)
     	swap_pages(page,tid_req,get_unused_page());
     else
     	swap_pages(page,tid_req,get_table_entry(tid_req,page));
-    
+
     memcpy((void*)address, &temp_block, sizeof(block_meta));
-    
-    next->prev = address;
+
+    if (next != NULL)
+        next->prev = address;
     prev->next = address;
 
     return address;
@@ -142,13 +150,8 @@ void align_pages(int page1, int page2, int tid_req){
         while(i < page2){
             unused_page= get_unused_page();
             swap_pages(i, tid_req, unused_page);
-            printf("I: %d\n", i);
             i++;
         }
-        
-        i = page1;
-        for ( ; i < page2; i++)
-            printf("ENTRY: %d\n", get_table_entry(tid_req, i));
 }
 
 block_meta * find_block(int tid_req, size_t x) {
@@ -157,8 +160,7 @@ block_meta * find_block(int tid_req, size_t x) {
     block_meta * b_meta = (block_meta *) &mem_block[FIRST_USER_PAGE];
     block_meta * next_meta;
     int max_page;
-    
-    
+
     int current_loc_page_zero = get_table_entry(tid_req, 0);
     if (current_loc_page_zero == OUT_OF_BOUNDS) {
         next_meta = (block_meta *) &mem_block[FIRST_USER_PAGE + sizeof(block_meta) + x];
@@ -199,17 +201,24 @@ block_meta * find_block(int tid_req, size_t x) {
         return next_meta;
     }
 
-    
+    int in_page = get_page_number_real_phy((unsigned long) b_meta);
+    swap_pages(in_page, tid_req, get_table_entry(tid_req, in_page));
+
+    // Need to swap pages into place to walk linked list.
     while (b_meta->free_size < (sizeof(block_meta) + x)) {
     	//printf("curr size: %d\n",b_meta->free_size);
+
         if (b_meta->next == NULL)
             return NULL;
 
         b_meta = b_meta->next;
+
+        in_page = get_page_number_real_phy((unsigned long) b_meta);
+        swap_pages(in_page, tid_req, get_table_entry(tid_req, in_page));
     }
     
-    block_meta * new_meta = init_block_meta_page(tid_req, x, b_meta->prev, b_meta->next);
-    
+    block_meta * new_meta = init_block_meta_page(tid_req, x, b_meta, b_meta->next);
+
     return new_meta;
 }
 
@@ -318,8 +327,8 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
     }
     
    
-    print_blk_meta(first_fit->prev);
-    return (void*) (first_fit->prev + 1);
+    //print_blk_meta(first_fit->prev);
+    return (void*) (first_fit->prev + sizeof(block_meta));
     
     
 /*  
@@ -536,9 +545,9 @@ void update_table_entry(int tid, int page, int new_page) {
 //    if (has_block_meta > 0)
 //        new_page = (1 << 12) + new_page;
     
-    if( get_table_entry(tid,page) < 0 ){
-    	note_page_used(page);
-    }
+    //if( get_table_entry(tid,page) < 0 ){
+    note_page_used(page);
+    //}
     
     memcpy(&mem_block[offset], &new_page, sizeof(int));
 
@@ -649,8 +658,11 @@ int get_unused_page() {
     int page_used;
     for ( ; i < NUM_USER_PAGES; i++) {
         memcpy(&page_used, &mem_block[get_note_page_offset(i)], sizeof(int));
-        if (!page_used)
+        if (page_used == 0) {
+            //printf("Page free: %d\n", i);
+            note_page_used(i);
             return i;
+        }
     }
 
     return -1;
@@ -667,7 +679,6 @@ int get_page_number_real_phy(unsigned long physical_address) {
     physical_address = ((physical_address - 
                         (unsigned long) mem_block) - 
                         FIRST_USER_PAGE);
-    int page_num = physical_address / PAGE_SIZE;
     return physical_address / PAGE_SIZE;
 }
 

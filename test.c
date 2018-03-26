@@ -33,7 +33,7 @@ void * test1() {
 	my_pthread_yield(); 
 
 	printf("Thread 1 second array ************\n");
-	int * z = (int*)malloc(20*sizeof(int)); 
+	int * z = (int*)malloc(20*sizeof(int));
 	//my_pthread_yield();
 
 	int j = 0; 
@@ -52,7 +52,7 @@ void * test1() {
 		printf("Z[%d] = %d \n", j , z[j] );
 		j++; 
 	}
-free(x);
+//free(x);
 
 	return NULL; 
 	/*int * x = (int*) myallocate(20, NULL, 0, 1);
