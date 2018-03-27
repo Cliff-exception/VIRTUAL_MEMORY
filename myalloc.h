@@ -23,10 +23,10 @@
 
 #define MEM_SIZE (8*1024*1024)
 #define PAGE_SIZE (4*1024)
-#define NUM_PROCESSES (65) // Needs to be odd to prevent alignment problems.
+#define NUM_PROCESSES (64) // Needs to be even to prevent alignment problems.
 #define OUT_OF_BOUNDS (-1)
 #define UNASSIGNED_IN_TABLE (-2)
-#define PAGE_TABLE_SIZE (2048 * (NUM_PROCESSES + 3) * 4) // Last page for used pages.
+#define PAGE_TABLE_SIZE (2048 * (NUM_PROCESSES + 4) * 4) // Last page for used pages.
 //#define KERNEL_MEMORY 32
 //#define FIRST_USER_PAGE (PAGE_TABLE_SIZE + (KERNEL_MEMORY * PAGE_SIZE))
 #define FIRST_USER_PAGE (PAGE_TABLE_SIZE)
@@ -107,13 +107,6 @@ int is_in_memory(int tid, int page);
 int is_in_upper_swap(int tid, int page);
 int is_in_lower_swap(int tid, int page);
 void update_table_entry(int tid, int page, int new_page, int location);
-void update_table_address(int has_block_meta, 
-                          int tid, 
-                          int page, 
-                          unsigned long physical_address);
-void update_table_multi_page(int tid, 
-                             int num_pages,
-                             unsigned long physical_address);
 int get_table_entry(int tid, int page);
 int contains_block_meta(int tid, int page);
 
@@ -123,8 +116,8 @@ void note_page_unused(int page);
 int get_unused_page();
 
 int get_note_page_offset_file(int portion, int page);
-void note_page_used_file(int portion, int page);
-void note_page_unused_file(int portion, int page);
+void note_page_used_file(int page);
+void note_page_unused_file(int page);
 int get_unused_page_file();
 
 int get_page_number_real_phy(unsigned long physical_address);

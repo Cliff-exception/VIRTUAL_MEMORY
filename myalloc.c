@@ -440,64 +440,14 @@ int is_in_lower_swap(int tid, int page) {
 void update_table_entry(int tid, int page, int new_page, int location) {
     int offset = get_table_offset(tid, page);
     int table_entry = create_table_entry(location, new_page);
-//    int offset = tid * NUM_USER_PAGES + (page * sizeof(int));
 
-//    int has_block_meta  = contains_block_meta(tid, page);
-
-//    if (has_block_meta > 0)
-//        new_page = (1 << 12) + new_page;
-    
-    //if( get_table_entry(tid,page) < 0 ){
-    note_page_used(page);
-    //}
+    if (location == 0)
+        note_page_used(page);
+    else
+        note_page_used_file(page);
     
     //memcpy(&mem_block[offset], &new_page, sizeof(int));
     memcpy(&mem_block[offset], &table_entry, sizeof(int));
-
-    return;
-}
-
-// Peels off the upper bits of a physical address and stores it at the correct
-// position for the given tid and page inside an inverted page table.
-void update_table_address(int has_block_meta, 
-                          int tid, 
-                          int page, 
-                          unsigned long physical_address) {
-    note_page_used(page);
-
-    //int offset = tid * NUM_USER_PAGES + (page * sizeof(int));
-    int offset = get_table_offset(tid, page);
-
-    int table_entry = get_table_entry(tid, page);
-
-    if (has_block_meta > 0)
-        table_entry = (1 << 12) + table_entry;
-    else
-        table_entry = (0 << 12) + table_entry;
-
-    memcpy(&mem_block[offset], &table_entry, sizeof(int));
-
-    return;
-}
-
-// Given a physical address where a block is to start and the number of pages
-// it extends, update all entries in the inverted page table to contain the
-// correct metadata.
-void update_table_multi_page(int tid, 
-                             int num_pages,
-                             unsigned long physical_address) {
-    int page = get_page_number_real_phy(physical_address);
-    printf("PAGE: %d\n", page);
-
-    int first_page = get_page_number_real_phy(physical_address);
-    update_table_address(1, tid, first_page, physical_address);
-
-    physical_address += PAGE_SIZE;
-    int i = first_page + 1;
-    for ( ; i < (first_page + num_pages); i++) {
-        update_table_address(0, tid, i, physical_address);
-        physical_address += PAGE_SIZE;
-    }
 
     return;
 }
@@ -569,7 +519,7 @@ int get_unused_page() {
 
 // portion: 0 - upper part of swap file, 1 - lower part of swap file
 int get_note_page_offset_file(int portion, int page) {
-    return get_table_offset((NUM_PROCESSES - 2) + portion, page);
+    return get_table_offset((NUM_PROCESSES + 1) + portion, page);
 }
 
 void note_page_used_file(int page) {
