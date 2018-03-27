@@ -8,6 +8,12 @@
 #include <malloc.h>
 #include <sys/mman.h>
 #include <signal.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include<unistd.h>
+#include<sys/mman.h>
+#include<stddef.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,7 +23,7 @@
 
 #define MEM_SIZE (8*1024*1024)
 #define PAGE_SIZE (4*1024)
-#define NUM_PROCESSES (47) // Needs to be odd to prevent alignment problems.
+#define NUM_PROCESSES (63) // Needs to be odd to prevent alignment problems.
 #define OUT_OF_BOUNDS (-1)
 #define UNASSIGNED_IN_TABLE (-2)
 #define PAGE_TABLE_SIZE (2048 * (NUM_PROCESSES + 3) * 4) // Last page for used pages.
@@ -40,6 +46,8 @@ static int page_num = MEM_SIZE/PAGE_SIZE; //should be 2048 without tune it
 
 
 typedef enum Page_Type {UNASSIGNED, THREAD, DATA} page_type;
+
+int swap_file_descriptor; // file descriptor for the swap_file
 
 /* Tyson - Commented out ken's structs in case changes fail.
 typedef struct blk{
