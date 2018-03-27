@@ -16,7 +16,7 @@ static void handler(int sig, siginfo_t *si, void *unused) {
         int table_entry = get_table_entry(tid, page);
 
             swap( page, tid); 
-           // return;  
+            return;  
 }
 
 
