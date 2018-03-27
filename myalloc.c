@@ -466,6 +466,56 @@ int get_unused_page() {
 
 //------------------------------------------------------------------------------
 //
+// Functions that allow keeping track of which pages are currently being used
+// or free.
+//
+//------------------------------------------------------------------------------
+
+// portion: 0 - upper part of swap file, 1 - lower part of swap file
+int get_note_page_offset_file(int portion, int page) {
+    return get_table_offset((NUM_PROCESSES - 2) + portion, page);
+}
+
+void note_page_used_file(int portion, int page) {
+    int offset = get_note_page_offset_file(portion, page);
+    int used = 1;
+    memcpy(&mem_block[offset], &used, sizeof(int));
+}
+
+void note_page_unused_file(int portion, int page) {
+    int offset = get_note_page_offset_file(portion, page);
+    int used = 0;
+    memcpy(&mem_block[offset], &used, sizeof(int));
+}
+
+int get_unused_page_file() {
+    int i = 0;
+    int page_used;
+    for ( ; i < NUM_USER_PAGES; i++) {
+        memcpy(&page_used, &mem_block[get_note_page_offset_file(0, i)], 
+            sizeof(int));
+        if (page_used == 0) {
+            //printf("Page free: %d\n", i);
+            note_page_used(i);
+            return i;
+        }
+    }
+
+    for ( ; i < NUM_USER_PAGES; i++) {
+        memcpy(&page_used, &mem_block[get_note_page_offset_file(1, i)], 
+            sizeof(int));
+        if (page_used == 0) {
+            //printf("Page free: %d\n", i);
+            note_page_used(i);
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+//------------------------------------------------------------------------------
+//
 // Functions for adding and demasking parts of a virtual memory address.
 //
 //------------------------------------------------------------------------------
