@@ -23,7 +23,7 @@
 
 #define MEM_SIZE (8*1024*1024)
 #define PAGE_SIZE (4*1024)
-#define NUM_PROCESSES (63) // Needs to be odd to prevent alignment problems.
+#define NUM_PROCESSES (65) // Needs to be odd to prevent alignment problems.
 #define OUT_OF_BOUNDS (-1)
 #define UNASSIGNED_IN_TABLE (-2)
 #define PAGE_TABLE_SIZE (2048 * (NUM_PROCESSES + 3) * 4) // Last page for used pages.
@@ -103,7 +103,7 @@ int get_table_offset(int tid_req, int page);
 unsigned long get_virtual_address(int num_pages,
                                   int tid, 
                                   unsigned long physical_address);
-void update_table_entry(int tid, int page, int new_page);
+void update_table_entry(int tid, int page, int new_page, int location);
 void update_table_address(int has_block_meta, 
                           int tid, 
                           int page, 
@@ -119,6 +119,11 @@ int get_note_page_offset(int page);
 void note_page_used(int page);
 void note_page_unused(int page);
 int get_unused_page();
+
+int get_note_page_offset_file(int portion, int page);
+void note_page_used_file(int portion, int page);
+void note_page_unused_file(int portion, int page);
+int get_unused_page_file();
 
 int get_page_number_real_phy(unsigned long physical_address);
 int get_page_number_phy(unsigned long physical_address);

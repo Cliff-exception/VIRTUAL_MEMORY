@@ -241,7 +241,7 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
     int page = get_page_number_real_phy((unsigned long)first_fit);
     int f = (x + 2 *sizeof(block_meta))/ PAGE_SIZE + 1;
     while(i < f){
- 	    update_table_entry(tid_req,page+i,page+i);
+ 	    update_table_entry(tid_req,page+i,page+i,0);
         note_page_used(page+i);
     	i++;
     }
@@ -310,8 +310,8 @@ void swap_pages(int in_pos_page, int out_tid, int out_pos_page) {
     int in_tid = get_active_tid(in_pos_page);
 
     if (in_tid > -1)
-        update_table_entry(in_tid, in_pos_page, out_pos_page);
-    update_table_entry(out_tid, in_pos_page, in_pos_page);
+        update_table_entry(in_tid, in_pos_page, out_pos_page, 0);
+    update_table_entry(out_tid, in_pos_page, in_pos_page, 0);
 
     return;
 }
@@ -339,10 +339,53 @@ int get_table_offset(int tid_req, int page) {
 //
 //------------------------------------------------------------------------------
 
+// location: 0 - memory   1 - upper file locations   2 - lower file locations
+int create_table_entry(int location, int page) {
+    return (location << 14) + page;
+}
+
+int get_location(int tid, int page) {
+    int table_entry = get_table_entry(tid, page);
+    return table_entry >> 14;
+}
+
+int get_page_from_table(int tid, int page) {
+    int table_entry = get_table_entry(tid, page);
+    return table_entry & 0xFFF;
+}
+
+int is_in_memory(int tid, int page) {
+    int table_entry = get_table_entry(tid, page);
+
+    if (get_location(tid, page) == 0)
+        return 1;
+    else
+        return 0;
+}
+
+int is_in_upper_swap(int tid, int page) {
+    int table_entry = get_table_entry(tid, page);
+
+    if (get_location(tid, page) == 1)
+        return 1;
+    else
+        return 0;
+}
+
+int is_in_lower_swap(int tid, int page) {
+    int table_entry = get_table_entry(tid, page);
+
+    if (get_location(tid, page) == 2)
+        return 1;
+    else
+        return 0;
+}
+
 // Update the page that is stored for a given tid inside the inverted page
 // table.
-void update_table_entry(int tid, int page, int new_page) {
+void update_table_entry(int tid, int page, int new_page, int location) {
     int offset = get_table_offset(tid, page);
+    int table_entry = create_table_entry(location, new_page);
 //    int offset = tid * NUM_USER_PAGES + (page * sizeof(int));
 
 //    int has_block_meta  = contains_block_meta(tid, page);
@@ -354,12 +397,11 @@ void update_table_entry(int tid, int page, int new_page) {
     note_page_used(page);
     //}
     
-    memcpy(&mem_block[offset], &new_page, sizeof(int));
+    //memcpy(&mem_block[offset], &new_page, sizeof(int));
+    memcpy(&mem_block[offset], &table_entry, sizeof(int));
 
     return;
 }
-
-
 
 // Peels off the upper bits of a physical address and stores it at the correct
 // position for the given tid and page inside an inverted page table.
