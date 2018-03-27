@@ -93,6 +93,7 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req);
 
 int get_active_tid(int page);
 void swap_pages(int in_pos_page, int out_tid, int out_pos_page);
+void swap( int mem_page, int tid );
 void memory_protect_page(int page);
 void memory_unprotect_page(int page);
 void protect_all_tid_pages(int tid);

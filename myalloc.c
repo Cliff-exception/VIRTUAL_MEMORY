@@ -28,12 +28,14 @@ void swap( int mem_page, int tid ) {
 
         if ( table_entry < 0 )
             swap_pages( mem_page, tid, get_unused_page());
-
         else
             swap_pages(mem_page, tid, get_page_from_table(tid, mem_page)); 
     }
 
     else {
+        printf("PAGE: %d  TID: %d\n", mem_page, tid);
+        printf("IN_MEMORY: %d  IN_TABLE: %d\n", get_location(tid, mem_page),
+            get_page_from_table(tid, mem_page));
 
         int swap_offset = get_page_from_table(tid, mem_page);
 
@@ -44,7 +46,7 @@ void swap( int mem_page, int tid ) {
         get_from_swap(address, swap_offset); 
 
         if ( in_tid > -1 )
-        update_table_entry(in_tid, mem_page, mem_page, 1);
+            update_table_entry(in_tid, mem_page, mem_page, 1);
         update_table_entry(in_tid, mem_page, swap_offset, 1); 
 
         return; 
@@ -130,10 +132,7 @@ block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_m
 
     int page = get_page_number_real_phy((unsigned long)address);
     
-    if(get_table_entry(tid_req,page)<0)
-    	swap_pages(page,tid_req,get_unused_page());
-    else
-    	swap_pages(page,tid_req,get_page_from_table(tid_req,page));
+    swap(page, tid_req);
 
     memcpy((void*)address, &temp_block, sizeof(block_meta));
 
@@ -157,7 +156,7 @@ block_meta * init_block_meta_page_zero(int tid_req) {
 
     block_meta * address = (block_meta *) &mem_block[FIRST_USER_PAGE];
 
-    swap_pages(0, tid_req, get_unused_page());
+    swap(0, tid_req);
     memcpy((void*)address, &temp_block, sizeof(block_meta));
 
     return address;
@@ -167,7 +166,7 @@ void align_pages(int page1, int page2, int tid_req){
         int unused_page;
         while(i < page2){
             unused_page= get_unused_page();
-            swap_pages(i, tid_req, unused_page);
+            swap(i, tid_req);
             i++;
         }
 }
@@ -210,7 +209,7 @@ block_meta * find_block(int tid_req, size_t x) {
     }
 
     int in_page = get_page_number_real_phy((unsigned long) b_meta);
-    swap_pages(in_page, tid_req, get_page_from_table(tid_req, in_page));
+    swap(in_page, tid_req);
 
     // Need to swap pages into place to walk linked list.
     while (b_meta->free_size < (sizeof(block_meta) + x)) {
@@ -222,7 +221,7 @@ block_meta * find_block(int tid_req, size_t x) {
         b_meta = b_meta->next;
 
         in_page = get_page_number_real_phy((unsigned long) b_meta);
-        swap_pages(in_page, tid_req, get_page_from_table(tid_req, in_page));
+        swap(in_page, tid_req);
     }
    
     block_meta * new_meta = init_block_meta_page(tid_req, x, b_meta, b_meta->next);
@@ -452,7 +451,7 @@ int get_page_from_table(int tid, int page) {
 int is_in_memory(int tid, int page) {
     int table_entry = get_table_entry(tid, page);
 
-    if (get_location(tid, page) == 0)
+    if (get_location(tid, page) == 0 || table_entry < 0)
         return 1;
     else
         return 0;
@@ -461,7 +460,7 @@ int is_in_memory(int tid, int page) {
 int is_in_upper_swap(int tid, int page) {
     int table_entry = get_table_entry(tid, page);
 
-    if (get_location(tid, page) == 1)
+    if (get_location(tid, page) == 1 && table_entry >= 0)
         return 1;
     else
         return 0;
@@ -470,7 +469,7 @@ int is_in_upper_swap(int tid, int page) {
 int is_in_lower_swap(int tid, int page) {
     int table_entry = get_table_entry(tid, page);
 
-    if (get_location(tid, page) == 2)
+    if (get_location(tid, page) == 2 && table_entry >= 0)
         return 1;
     else
         return 0;
