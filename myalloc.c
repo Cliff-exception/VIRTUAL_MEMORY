@@ -61,13 +61,21 @@ void pages_init(){
     return;
 }
 
-void print_blk_meta(block_meta * blk){
+void print_blk_list(block_meta * blk){
 
     if(!blk) return;
     printf("blk size: %d\n", blk->blk_size);
     printf("free size: %d\n", blk->free_size);
     
-    print_blk_meta(blk->next);
+    print_blk_list(blk->next);
+}
+
+void print_blk_meta(block_meta * blk){
+//printf("one blk!\n");
+    if(!blk) return;
+    printf("blk size: %d\n", blk->blk_size);
+    printf("free size: %d\n", blk->free_size);
+  
 }
 
 block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_meta * next) {
@@ -167,6 +175,7 @@ block_meta * find_block(int tid_req, size_t x) {
         b_meta->tid = tid_req;
         next_meta->tid = tid_req; 
         
+        //print_blk_meta(next_meta);//
         return next_meta;
     }
 
@@ -185,9 +194,12 @@ block_meta * find_block(int tid_req, size_t x) {
         in_page = get_page_number_real_phy((unsigned long) b_meta);
         swap_pages(in_page, tid_req, get_table_entry(tid_req, in_page));
     }
-    
+   
     block_meta * new_meta = init_block_meta_page(tid_req, x, b_meta, b_meta->next);
-
+    new_meta->blk_size = x;
+    
+    //print_blk_meta(new_meta);//
+    
     return new_meta;
 }
 
@@ -248,7 +260,7 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
     
    
     //print_blk_meta(first_fit->prev);
-    return (void*) (first_fit->prev + sizeof(block_meta));
+    return (void*) (first_fit->prev + 1);
 }
 
 
@@ -257,10 +269,41 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
 void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
 	block_meta * target = (block_meta *)ptr;
 	
+	
 	target--;
+	//print_blk_meta(target);
 	target = target->next;
-	printf("||||||||||||||||||||||\n");
-	print_blk_meta(target);
+	//printf("||||||||||||||||||||||\n");
+	//print_blk_meta(target);
+	
+	//printf("%d\n",target);
+	
+	block_meta* prev = NULL, *next = NULL;
+	
+	if(target->next){
+		if(target->next->free_size > 0){ //coalescing with next blk
+			next = target->next;
+			target->next = next->next;
+			
+			target->free_size = target->blk_size +next->free_size +sizeof(block_meta);
+			
+			//printf("next block coalesced!\n");
+			//print_blk_meta(target);
+			
+		}
+		
+	}
+	
+	if(target->prev){
+		if(target->prev->free_size > 0){ //coalescing with prev blk
+			prev = target->prev;
+			prev->next = target->next; 
+			prev->free_size += target->blk_size + sizeof(block_meta);
+			
+			//printf("prev block coalesced!\n");
+			//print_blk_meta(prev);
+		}
+	}
 
 }
 
