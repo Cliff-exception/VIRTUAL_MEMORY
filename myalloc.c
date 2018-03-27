@@ -1,27 +1,60 @@
 #include "myalloc.h"
 #include "my_pthread_t.h"
 
+int evict = 0; 
+
 static void handler(int sig, siginfo_t *si, void *unused) {
+
     //if (si->si_addr > &mem_block && si->si_addr < &mem_block + MEM_SIZE) {
         printf("Got SIGSEGV at address: 0x%lx\n",(long) si->si_addr);
         int page = get_page_number_real_phy((unsigned long) si->si_addr);
         printf("sigsegv page: %d\n", page);
     //    printf("TID: %d\n", get_curr_tid());
         int tid = get_curr_tid();
+
     //    printf("Sigsegv calling swap!\n");
         int table_entry = get_table_entry(tid, page);
 
-        if (table_entry < 0)
-            swap_pages(page, tid, get_unused_page());
+        if (is_in_memory(tid, page)) {
+            swap( page, tid, 1 ); 
+            return; 
+        }
+
+        swap(page, tid, 0); 
+        return; 
+}
+
+
+void swap( int mem_page, int tid, int location  ) {
+
+    if ( location ) {
+
+        int table_entry = get_table_entry(tid, mem_page); 
+
+        if ( table_entry < 0 )
+            swap_pages( mem_page, tid, get_unused_page());
+
         else
-            swap_pages(page, tid, get_page_from_table(tid, page));
-    //}
-    /*
-    else {
-        printf("Real segfault!\n");
-        exit(1);
+            swap_pages(mem_page, tid, get_page_from_table(tid, mem_page)); 
     }
-    */
+
+    else {
+
+        int swap_offset = get_page_from_table(tid, mem_page);
+
+        int in_tid = get_active_tid(mem_page); 
+
+        unsigned long  address = (unsigned long)&mem_block[FIRST_USER_PAGE +  mem_page*PAGE_SIZE]; 
+
+        get_from_swap(address, swap_offset); 
+
+        if ( in_tid > -1 )
+        update_table_entry(in_tid, mem_page, mem_page, 1);
+        update_table_entry(in_tid, mem_page, swap_offset, 1); 
+
+        return; 
+    }
+
 }
 
 void pages_init(){
@@ -641,6 +674,12 @@ int swap_space_init() {
 
 void evict_page ( unsigned long address, int swap_file_offset ) {
 
+    if ( evict == 0 ) {
+        // first time evciting a page
+        swap_space_init(); 
+        evict++; 
+    }
+
     int seek_size = lseek(swap_file_descriptor, swap_file_offset*PAGE_SIZE, SEEK_SET); 
 
     if ( seek_size == -1 ) {
@@ -668,8 +707,8 @@ to_mem_swap_offset: a pointer to the offset (in the swapfile) of the page being 
                     the pointer allows us to assign a new offset if the page does yet reside in the swapfile
 */
 
-int get_from_memory ( unsigned long to_mem_offset, int out_swap_offset) {
-
+int get_from_swap ( unsigned long to_mem_offset, int out_swap_offset) {
+    printf("Attempting to grab from swap file\n");
     // buffer for the page we are reading from swapfile
     char from_mem[PAGE_SIZE]; 
 

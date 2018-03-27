@@ -48,7 +48,6 @@ static int page_num = MEM_SIZE/PAGE_SIZE; //should be 2048 without tune it
 typedef enum Page_Type {UNASSIGNED, THREAD, DATA} page_type;
 
 int swap_file_descriptor; // file descriptor for the swap_file
-
 /* Tyson - Commented out ken's structs in case changes fail.
 typedef struct blk{
     int istaken;
@@ -128,5 +127,11 @@ int get_upper_phy_mem(unsigned long physical_address);
 int get_page_number_virtual(unsigned long virtual_address);
 unsigned long build_virtual_address(int page, int offset);
 unsigned long safely_align_block(unsigned long phy_addr);
+
+
+int swap_space_init();
+void evict_page ( unsigned long address, int swap_file_offset );
+int get_from_swap ( unsigned long to_mem_offset, int out_swap_offset);
+void swap( int mem_page, int tid, int location  ); 
 
 #endif

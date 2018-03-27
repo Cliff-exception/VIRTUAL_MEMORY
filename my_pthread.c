@@ -13,7 +13,8 @@ tcb * current_thread = NULL;
 int number_of_threads = 0;
 
 void init_main () {
-
+    
+    pages_init();
     tcb * main_block = (tcb*)malloc(sizeof(tcb)); 
     main_block->thread_context = (ucontext_t*)malloc(sizeof(ucontext_t)); 
     main_block->priority = 0; 
@@ -24,9 +25,6 @@ void init_main () {
     //capture the context and set the current running thread to the main block 
     getcontext(main_block->thread_context); 
     current_thread = main_block; 
-
-    pages_init();
-
     // add main block to the queue of threads
    // Insert_to_qeueue(main_block); 
 }
