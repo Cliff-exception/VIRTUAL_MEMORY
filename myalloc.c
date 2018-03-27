@@ -85,7 +85,7 @@ block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_m
     block_meta temp_block;
     temp_block.p_type = UNASSIGNED;
     temp_block.blk_size = block_size;
-    temp_block.free_size = block_size;
+    //temp_block.free_size = block_size;
     temp_block.tid = tid_req;
     temp_block.prev = prev;
     temp_block.next = next;
@@ -97,6 +97,8 @@ block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_m
     	prev->free_size = 0;
     	return prev;
     }
+
+    temp_block.free_size = (unsigned long)next - (unsigned long)address;
 
     int page = get_page_number_real_phy((unsigned long)address);
     
@@ -164,10 +166,10 @@ block_meta * find_block(int tid_req, size_t x) {
         
         next_meta->free_size = next_meta->prev->free_size - x - sizeof(block_meta); //maybe the source of 
         //printf("prev free size: %d, free size: %d\n",next_meta->prev->free_size, next_meta->free_size);
-        b_meta->free_size = 0;
+        b_meta->free_size = x;
         
-        next_meta->blk_size = next_meta->free_size;
-        b_meta->blk_size = x;
+        next_meta->blk_size = x;
+        b_meta->blk_size = 0;
             
         b_meta->p_type = DATA;
         next_meta->p_type = UNASSIGNED;
@@ -197,6 +199,7 @@ block_meta * find_block(int tid_req, size_t x) {
    
     block_meta * new_meta = init_block_meta_page(tid_req, x, b_meta, b_meta->next);
     new_meta->blk_size = x;
+    new_meta->free_size = x;
     
     //print_blk_meta(new_meta);//
     
@@ -279,34 +282,33 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
 	//print_blk_meta(target);
 	
 	//printf("%d\n",target);
+
+    target->p_type = UNASSIGNED;
 	
 	block_meta* prev = NULL, *next = NULL;
-	
-	if(target->next){
-		if(target->next->free_size > 0){ //coalescing with next blk
-			next = target->next;
-			target->next = next->next;
-			
-			target->free_size = target->blk_size +next->free_size +sizeof(block_meta);
-			
-			//printf("next block coalesced!\n");
-			//print_blk_meta(target);
-			
-		}
-		
-	}
-	
-	if(target->prev){
-		if(target->prev->free_size > 0){ //coalescing with prev blk
-			prev = target->prev;
-			prev->next = target->next; 
-			prev->free_size += target->blk_size + sizeof(block_meta);
-			
-			//printf("prev block coalesced!\n");
-			//print_blk_meta(prev);
-		}
-	}
+    if (target->prev) {
+        prev = target->prev;
 
+        if (prev->p_type == UNASSIGNED) { //coalescing with prev blk
+            prev->prev->next = target;
+            prev->prev->free_size = prev->blk_size + 
+                                    target->blk_size + 
+                                    sizeof(block_meta);
+
+            target->prev = prev->prev;
+        }
+    }
+
+    if (target->next) {
+        next = target->next;
+        if (next->p_type == UNASSIGNED) { // coalescing with next blk
+            next->prev = target->prev;
+            target->prev->next = next;
+            target->prev->free_size = target->free_size +
+                                      prev->free_size +
+                                      sizeof(block_meta);
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
