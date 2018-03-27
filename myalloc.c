@@ -14,7 +14,7 @@ static void handler(int sig, siginfo_t *si, void *unused) {
         if (table_entry < 0)
             swap_pages(page, tid, get_unused_page());
         else
-            swap_pages(page, tid, get_table_entry(tid, page));
+            swap_pages(page, tid, get_page_from_table(tid, page));
     //}
     /*
     else {
@@ -103,7 +103,7 @@ block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_m
     if(get_table_entry(tid_req,page)<0)
     	swap_pages(page,tid_req,get_unused_page());
     else
-    	swap_pages(page,tid_req,get_table_entry(tid_req,page));
+    	swap_pages(page,tid_req,get_page_from_table(tid_req,page));
 
     memcpy((void*)address, &temp_block, sizeof(block_meta));
 
@@ -180,7 +180,7 @@ block_meta * find_block(int tid_req, size_t x) {
     }
 
     int in_page = get_page_number_real_phy((unsigned long) b_meta);
-    swap_pages(in_page, tid_req, get_table_entry(tid_req, in_page));
+    swap_pages(in_page, tid_req, get_page_from_table(tid_req, in_page));
 
     // Need to swap pages into place to walk linked list.
     while (b_meta->free_size < (sizeof(block_meta) + x)) {
@@ -192,7 +192,7 @@ block_meta * find_block(int tid_req, size_t x) {
         b_meta = b_meta->next;
 
         in_page = get_page_number_real_phy((unsigned long) b_meta);
-        swap_pages(in_page, tid_req, get_table_entry(tid_req, in_page));
+        swap_pages(in_page, tid_req, get_page_from_table(tid_req, in_page));
     }
    
     block_meta * new_meta = init_block_meta_page(tid_req, x, b_meta, b_meta->next);
@@ -204,11 +204,12 @@ block_meta * find_block(int tid_req, size_t x) {
 }
 
 void protect_all_tid_pages(int tid){
-    
     int curr_page = 0, prot_page;
     while(curr_page < NUM_USER_PAGES){
-        prot_page = get_table_entry(tid, curr_page);
-        memory_protect_page(prot_page);
+        if (is_in_memory(tid, curr_page)) {
+            prot_page = get_page_from_table(tid, curr_page);
+            memory_protect_page(prot_page);
+        }
         curr_page++;
     }
 }
@@ -216,11 +217,12 @@ void protect_all_tid_pages(int tid){
 void unprotect_all_tid_pages(int tid){
     int curr_page = 0, prot_page;
     while(curr_page < NUM_USER_PAGES){
-        prot_page = get_table_entry(tid, curr_page);
-        memory_unprotect_page(prot_page);
+        if (is_in_memory(tid, curr_page)) {
+            prot_page = get_table_entry(tid, curr_page);
+            memory_unprotect_page(prot_page);
+        }
         curr_page++;
     }
-    
 }
 
 void swap_protection(int out_tid,int in_tid){
@@ -319,11 +321,13 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
 // free.
 int get_active_tid(int page) {
     int i = 0;
+    int location;
     int current_page;
     for ( ; i < NUM_PROCESSES; i++) {
+        location = get_location(i, page);
         current_page = get_table_entry(i, page);
         //printf("%d:%d\n", page, current_page);
-        if (current_page == page)
+        if (location == 0 && current_page == page)
             return i;
     }
 
@@ -423,6 +427,11 @@ int is_in_lower_swap(int tid, int page) {
     else
         return 0;
 }
+
+//int main() {
+//    int entry = create_table_entry(0, 12);
+//    printf("Entry: %d\n", entry);
+//}
 
 // Update the page that is stored for a given tid inside the inverted page
 // table.

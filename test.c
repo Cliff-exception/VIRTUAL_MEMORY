@@ -311,7 +311,7 @@ int main() {
 	//pthread_create(&tid_6, NULL, &str_test2, NULL); 
 
 	while ( tid_1 < 64 ) {
-
+//	while (tid_1 < 2) {
 		pthread_create(&tid_1, NULL, &test1, &tid_1); 
 		tid_1++; 
 	}
@@ -319,7 +319,7 @@ int main() {
 	tid_1 = 1; 
 
 	while ( tid_1 < 64 ) {
-
+//	while (tid_1 < 2) {
 	pthread_join(tid_1, NULL);
 	tid_1++; 
 /*	pthread_join(tid_2, NULL);

@@ -100,9 +100,12 @@ void protect_all_tid_pages(int tid);
 void unprotect_all_tid_pages(int tid);
 int get_table_offset(int tid_req, int page);
 
-unsigned long get_virtual_address(int num_pages,
-                                  int tid, 
-                                  unsigned long physical_address);
+int create_table_entry(int location, int page);
+int get_location(int tid, int page);
+int get_page_from_table(int tid, int page);
+int is_in_memory(int tid, int page);
+int is_in_upper_swap(int tid, int page);
+int is_in_lower_swap(int tid, int page);
 void update_table_entry(int tid, int page, int new_page, int location);
 void update_table_address(int has_block_meta, 
                           int tid, 
@@ -113,7 +116,6 @@ void update_table_multi_page(int tid,
                              unsigned long physical_address);
 int get_table_entry(int tid, int page);
 int contains_block_meta(int tid, int page);
-int get_upper_phy_mem_table(int tid, int page);
 
 int get_note_page_offset(int page);
 void note_page_used(int page);
