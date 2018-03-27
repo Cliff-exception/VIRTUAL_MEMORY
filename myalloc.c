@@ -388,7 +388,7 @@ int get_table_offset(int tid_req, int page) {
 //
 //------------------------------------------------------------------------------
 
-// location: 0 - memory   1 - upper file locations   2 - lower file locations
+// location: 0 - memory   1 - upper file locations
 int create_table_entry(int location, int page) {
     return (location << 14) + page;
 }
@@ -572,13 +572,25 @@ int get_note_page_offset_file(int portion, int page) {
     return get_table_offset((NUM_PROCESSES - 2) + portion, page);
 }
 
-void note_page_used_file(int portion, int page) {
+void note_page_used_file(int page) {
+    int portion = 0;
+    if (page > NUM_USER_PAGES) {
+        portion = 1;
+        page = page - NUM_USER_PAGES;
+    }
+
     int offset = get_note_page_offset_file(portion, page);
     int used = 1;
     memcpy(&mem_block[offset], &used, sizeof(int));
 }
 
-void note_page_unused_file(int portion, int page) {
+void note_page_unused_file(int page) {
+    int portion = 0;
+    if (page > NUM_USER_PAGES) {
+        portion = 1;
+        page = page - NUM_USER_PAGES;
+    }
+
     int offset = get_note_page_offset_file(portion, page);
     int used = 0;
     memcpy(&mem_block[offset], &used, sizeof(int));
@@ -602,8 +614,8 @@ int get_unused_page_file() {
             sizeof(int));
         if (page_used == 0) {
             //printf("Page free: %d\n", i);
-            note_page_used(i);
-            return i;
+            note_page_used(i + NUM_USER_PAGES);
+            return (i + NUM_USER_PAGES);
         }
     }
 
