@@ -132,6 +132,6 @@ unsigned long safely_align_block(unsigned long phy_addr);
 int swap_space_init();
 void evict_page ( unsigned long address, int swap_file_offset );
 int get_from_swap ( unsigned long to_mem_offset, int out_swap_offset);
-void swap( int mem_page, int tid, int location  ); 
+void swap( int mem_page, int tid); 
 
 #endif

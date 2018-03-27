@@ -15,19 +15,14 @@ static void handler(int sig, siginfo_t *si, void *unused) {
     //    printf("Sigsegv calling swap!\n");
         int table_entry = get_table_entry(tid, page);
 
-        if (is_in_memory(tid, page)) {
-            swap( page, tid, 1 ); 
-            return; 
-        }
-
-        swap(page, tid, 0); 
-        return; 
+            swap( page, tid); 
+            return;  
 }
 
 
-void swap( int mem_page, int tid, int location  ) {
+void swap( int mem_page, int tid ) {
 
-    if ( location ) {
+    if ( is_in_memory(tid, mem_page)) {
 
         int table_entry = get_table_entry(tid, mem_page); 
 
