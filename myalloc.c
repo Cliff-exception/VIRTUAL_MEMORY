@@ -16,7 +16,7 @@ static void handler(int sig, siginfo_t *si, void *unused) {
         int table_entry = get_table_entry(tid, page);
 
             swap( page, tid); 
-            return;  
+           // return;  
 }
 
 
@@ -300,24 +300,38 @@ void * myallocate(size_t x, char * file, int linenum, int tid_req){
 
 //mydeallocate(x, __FILE__, __LINE__, THREADREQ)
 void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
+
+	int page = get_page_number_real_phy((unsigned long)ptr);
+	swap(page, tid_req);
+	
 	block_meta * target = (block_meta *)ptr;
 	
 	
 	target--;
 	//print_blk_meta(target);
+	
+	page = get_page_number_real_phy((unsigned long)target->next);
+	swap(page, tid_req);
 	target = target->next;
 	//printf("||||||||||||||||||||||\n");
 	//print_blk_meta(target);
 	
 	//printf("%d\n",target);
+	
+
 
     target->p_type = UNASSIGNED;
 	
 	block_meta* prev = NULL, *next = NULL;
+	
+	page = get_page_number_real_phy((unsigned long)target->prev);
+	swap(page, tid_req);
     if (target->prev) {
         prev = target->prev;
 
         if (prev->p_type == UNASSIGNED) { //coalescing with prev blk
+            page = get_page_number_real_phy((unsigned long)prev->prev);
+	    swap(page, tid_req);
             prev->prev->next = target;
             prev->prev->free_size = prev->blk_size + 
                                     target->blk_size + 
@@ -326,10 +340,14 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
             target->prev = prev->prev;
         }
     }
-
+	page = get_page_number_real_phy((unsigned long)target->next);
+	swap(page, tid_req);
     if (target->next) {
         next = target->next;
         if (next->p_type == UNASSIGNED) { // coalescing with next blk
+        
+        page = get_page_number_real_phy((unsigned long)target->prev);
+	swap(page, tid_req);
             next->prev = target->prev;
             target->prev->next = next;
             target->prev->free_size = target->free_size +
