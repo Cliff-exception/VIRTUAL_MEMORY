@@ -55,8 +55,7 @@ void swap( int mem_page, int tid ) {
     }
 
 }
-static my_pthread_mutex_t shalock;
-static int shahand = FIRST_SHARED_PAGE;
+
 void pages_init(){
     my_pthread_mutex_init(&file_lock, NULL); 
     swap_space_init();
@@ -74,29 +73,6 @@ void pages_init(){
 
     // Initialize memory.
     mem_block = (char*) memalign(sysconf(_SC_PAGE_SIZE), MEM_SIZE);
-    
-    
-    
-    
-    int islock = my_pthread_mutex_init(&shalock, NULL);
-    if(islock==-1) {
- 	printf("lock failed! All shalloc calls will return NULL from now on\n");
-    }
-   
-    
-    
-    /*
-    int * shand = (int *)&mem_block[FIRST_SHARED_PAGE];
-    my_pthread_mutex_t * shalock = (my_pthread_mutex_t *)&mem_block[FIRST_SHARED_PAGE + sizeof(int)];
-    
-    *shand = sizeof(int)+ sizeof(my_pthread_mutex_t);
-    
-    
-    int islock = my_pthread_mutex_init(shalock, NULL);
-    if(islock==-1) {
- 	printf("lock failed! All shalloc calls will return NULL from now on\n");
-    }
-*/
 
     // Update inverted page table to show that no pages have been assigned.
     int out_of_bounds = OUT_OF_BOUNDS;
@@ -117,51 +93,6 @@ void pages_init(){
     }
 
     return;
-}
-void * shalloc(size_t size){
-
-	/*	
-    assert(size>0);
-    
-    //mprotect((void*) &mem_block[FIRST_SHARED_PAGE], 4* PAGE_SIZE, PROT_READ | PROT_WRITE);
-    int * shand = (int *)&mem_block[FIRST_SHARED_PAGE];
-    //printf("shand init %d\n",*shand);
-    //printf("addr shand: %x\n",shand);
-    if(*shand >= MEM_SIZE) return NULL; //when shared region is full
-    
-    my_pthread_mutex_t * shalock  = (my_pthread_mutex_t *) &mem_block[FIRST_SHARED_PAGE + sizeof(int)];
-    
-    my_pthread_mutex_lock(shalock);
-    char * res = &mem_block[*shand];
-    
-  
-    *shand += size;
-    
-    //printf("shand after %d\n",*shand);
-    my_pthread_mutex_unlock(shalock);
-    if(*shand > MEM_SIZE) return NULL;
-    
-    
-    return (void*)res;
-    */
-   
-    
-    assert(size>0);
-    
-    
-    if(shahand >= MEM_SIZE) return NULL; //when shared region is full
-    
-    my_pthread_mutex_lock(&shalock);
-    char * res = &mem_block[shahand];
-    
-  
-    shahand += size;
-    
-    printf("shand after %d  %x\n",shahand,&mem_block[shahand]);
-    my_pthread_mutex_unlock(&shalock);
-    if(shahand > MEM_SIZE) return NULL;
-    return (void*)res;
-    
 }
 
 void print_blk_list(block_meta * blk){
