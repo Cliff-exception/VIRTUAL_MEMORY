@@ -54,16 +54,27 @@ free(x);
 	}
 free(z);
 
-	return NULL; 
-	/*int * x = (int*) myallocate(20, NULL, 0, 1);
+
+int * a =  (int *) malloc(20);
+int * b =  (int *) malloc(20);
+int * c =  (int *) malloc(20);
+int * d =  (int *) malloc(20);
+
+free(a);free(b);free(c);free(d);
+
+
+	//return NULL; 
+	/*
+	int * x = (int*) myallocate(20, NULL, 0, 1);
 	x[0] = 2;
 	x[1] = 3;
 
 	pthread_yield();
 
 	printf("%d:%d\n", x[0], x[1]);
+	*/
 
-	return NULL; */
+	return NULL; 
 }
 
 void * test2() {

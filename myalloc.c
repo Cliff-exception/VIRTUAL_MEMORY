@@ -307,6 +307,10 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
 	
 	
 	target--;
+	
+	page = get_page_number_real_phy((unsigned long)target);
+	swap(page, tid_req);
+	
 	//print_blk_meta(target);
 	
 	page = get_page_number_real_phy((unsigned long)target->next);
@@ -323,12 +327,16 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
 	
 	block_meta* prev = NULL, *next = NULL;
 	
-	page = get_page_number_real_phy((unsigned long)target->prev);
-	swap(page, tid_req);
+	//page = get_page_number_real_phy((unsigned long)target->prev);
+	//swap(page, tid_req);
     if (target->prev) {
+    	page = get_page_number_real_phy((unsigned long)target->prev);
+	swap(page, tid_req);
         prev = target->prev;
 
         if (prev->p_type == UNASSIGNED) { //coalescing with prev blk
+        
+            //printf("coalescing with prev blk\n");
             page = get_page_number_real_phy((unsigned long)prev->prev);
 	    swap(page, tid_req);
             prev->prev->next = target;
@@ -339,12 +347,14 @@ void mydeallocate(void * ptr, char * file, int linenum, int tid_req){
             target->prev = prev->prev;
         }
     }
-	page = get_page_number_real_phy((unsigned long)target->next);
-	swap(page, tid_req);
+	//page = get_page_number_real_phy((unsigned long)target->next);
+	//swap(page, tid_req);
     if (target->next) {
+    	page = get_page_number_real_phy((unsigned long)target->next);
+	swap(page, tid_req);
         next = target->next;
         if (next->p_type == UNASSIGNED) { // coalescing with next blk
-        
+        //printf("coalescing with next blk\n");
         page = get_page_number_real_phy((unsigned long)target->prev);
 	swap(page, tid_req);
             next->prev = target->prev;
