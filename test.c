@@ -61,7 +61,7 @@ void * test1( void * args) {
 	int * num = (int*) args; 
 	int mult = *num; 
 
-	int * x = (int *) malloc(15600 * sizeof(int)); 
+	int * x = (int *) malloc(15625 * sizeof(int)); 
 
 	int i = 0; 
 
