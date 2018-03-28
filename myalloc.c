@@ -145,8 +145,10 @@ block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_m
     else
     	address->free_size = &mem_block[MEM_SIZE-1] - (char*)address;//
     	
-    if (next != NULL)
+    if (next != NULL) {
+        swap(tid_req, get_page_number_real_phy(next->prev));
         next->prev = address;
+    }
     prev->next = address;
 
     return address;
@@ -571,7 +573,7 @@ int get_unused_page() {
         }
     }
 
-    return naive_evictor();
+    return -1;
 }
 
 //------------------------------------------------------------------------------
@@ -623,8 +625,6 @@ int get_unused_page_file() {
         }
     }
 
-    i = 0; 
-
     for ( ; i < NUM_USER_PAGES; i++) {
         memcpy(&page_used, &mem_block[get_note_page_offset_file(1, i)], 
             sizeof(int));
@@ -673,45 +673,8 @@ unsigned long safely_align_block(unsigned long phy_addr){
 // functions for the swap_file
 
 ------------------------------------------------------*/
-// tid for updating
-//update_table_entry, tid, page evicting, offset in th swap_file, 1
-int naive_evictor () { 
-
-    printf("physical memory was filled\n");
-
-    int tid = get_curr_tid(); 
-    // get_unused_page_file
-
-    if ( evict == 0 ) {
-        // first time evciting a page
-        printf("we are here\n");
-        swap_space_init();
-        printf("WTF!\n"); 
-        srand(time(NULL)); 
-        printf("We are here now\n");
-        evict++; 
-    }   
-
-    printf("got here\n");
-
-    int offset = get_unused_page_file(); 
-
-    int page = rand()%NUM_USER_PAGES; 
-
-    unsigned long address = (unsigned long)&mem_block[FIRST_USER_PAGE + page *PAGE_SIZE]; 
-
-    evict_page(address, offset ); 
-
-    update_table_entry(tid, page, offset,1); 
-
-    return page; 
-}
-
 
 int swap_space_init() {
-
-    printf("initializing swap space\n");
-
     swap_file_descriptor = open("swap_file", O_CREAT | O_RDWR | S_IWUSR | S_IRUSR); 
 
     if ( swap_file_descriptor == -1 ) {
@@ -743,6 +706,12 @@ int swap_space_init() {
 }
 
 void evict_page ( unsigned long address, int swap_file_offset ) {
+
+    if ( evict == 0 ) {
+        // first time evciting a page
+        swap_space_init(); 
+        evict++; 
+    }
 
     int seek_size = lseek(swap_file_descriptor, swap_file_offset*PAGE_SIZE, SEEK_SET); 
 
