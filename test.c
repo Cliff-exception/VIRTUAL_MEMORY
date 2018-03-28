@@ -80,11 +80,11 @@ void * test1( void * args) {
 		i++; 
 	}
 
-	my_pthread_yield(); 
+//	my_pthread_yield(); 
 
 	printf("Thread %d second array ************\n", mult);
 	int * z = (int*)malloc(20*sizeof(int)); 
-	my_pthread_yield();
+//	my_pthread_yield();
 
 	int j = 0; 
 
@@ -106,7 +106,7 @@ void * test1( void * args) {
 
 	char * y = (char*)malloc(sizeof(char)*20000); 
 
-	my_pthread_yield(); 
+//	my_pthread_yield(); 
 
 	//printf("String of thread_1\n");
 

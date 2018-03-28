@@ -23,7 +23,13 @@ X[8] = 24
 X[9] = 27 
 X[10] = 30 
 Thread 2 second array ************
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
 Thread 3 second array ************
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
 Thread 4 First Array ******************
 X[0] = 0 
 X[1] = 4 
@@ -37,7 +43,8 @@ X[8] = 32
 X[9] = 36 
 X[10] = 40 
 Thread 4 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 22 
 Z[1] = 24 
@@ -50,7 +57,10 @@ Z[7] = 36
 Z[8] = 38 
 Z[9] = 40 
 Z[10] = 42 
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cbe5ff0
+sigsegv page: 65
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 33 
 Z[1] = 36 
@@ -63,7 +73,9 @@ Z[7] = 54
 Z[8] = 57 
 Z[9] = 60 
 Z[10] = 63 
-physical memory full!
+Got SIGSEGV at address: 0x7f8b0cbe7ff0
+sigsegv page: 67
+NEXT->PREV: cba4000
 Thread 5 First Array ******************
 X[0] = 0 
 X[1] = 5 
@@ -77,7 +89,8 @@ X[8] = 40
 X[9] = 45 
 X[10] = 50 
 Thread 5 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 44 
 Z[1] = 48 
@@ -90,6 +103,9 @@ Z[7] = 72
 Z[8] = 76 
 Z[9] = 80 
 Z[10] = 84 
+Got SIGSEGV at address: 0x7f8b0cc09ff0
+sigsegv page: 101
+NEXT->PREV: cba4000
 Thread 6 First Array ******************
 X[0] = 0 
 X[1] = 6 
@@ -115,8 +131,14 @@ X[8] = 56
 X[9] = 63 
 X[10] = 70 
 Thread 6 second array ************
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
 Thread 7 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 55 
 Z[1] = 60 
@@ -129,6 +151,9 @@ Z[7] = 90
 Z[8] = 95 
 Z[9] = 100 
 Z[10] = 105 
+Got SIGSEGV at address: 0x7f8b0cc2dff0
+sigsegv page: 137
+NEXT->PREV: cba4000
 Thread 8 First Array ******************
 X[0] = 0 
 X[1] = 8 
@@ -142,7 +167,8 @@ X[8] = 64
 X[9] = 72 
 X[10] = 80 
 Thread 8 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 66 
 Z[1] = 72 
@@ -155,7 +181,10 @@ Z[7] = 108
 Z[8] = 114 
 Z[9] = 120 
 Z[10] = 126 
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cc70ff0
+sigsegv page: 204
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 77 
 Z[1] = 84 
@@ -168,6 +197,9 @@ Z[7] = 126
 Z[8] = 133 
 Z[9] = 140 
 Z[10] = 147 
+Got SIGSEGV at address: 0x7f8b0cc72ff0
+sigsegv page: 206
+NEXT->PREV: cba4000
 Thread 9 First Array ******************
 X[0] = 0 
 X[1] = 9 
@@ -181,7 +213,8 @@ X[8] = 72
 X[9] = 81 
 X[10] = 90 
 Thread 9 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 88 
 Z[1] = 96 
@@ -194,6 +227,9 @@ Z[7] = 144
 Z[8] = 152 
 Z[9] = 160 
 Z[10] = 168 
+Got SIGSEGV at address: 0x7f8b0cc95ff0
+sigsegv page: 241
+NEXT->PREV: cba4000
 Thread 10 First Array ******************
 X[0] = 0 
 X[1] = 10 
@@ -207,7 +243,8 @@ X[8] = 80
 X[9] = 90 
 X[10] = 100 
 Thread 10 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 99 
 Z[1] = 108 
@@ -220,6 +257,9 @@ Z[7] = 162
 Z[8] = 171 
 Z[9] = 180 
 Z[10] = 189 
+Got SIGSEGV at address: 0x7f8b0ccb9ff0
+sigsegv page: 277
+NEXT->PREV: cba4000
 Thread 11 First Array ******************
 X[0] = 0 
 X[1] = 11 
@@ -245,8 +285,14 @@ X[8] = 96
 X[9] = 108 
 X[10] = 120 
 Thread 11 second array ************
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
 Thread 12 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 110 
 Z[1] = 120 
@@ -259,6 +305,9 @@ Z[7] = 180
 Z[8] = 190 
 Z[9] = 200 
 Z[10] = 210 
+Got SIGSEGV at address: 0x7f8b0ccdcff0
+sigsegv page: 312
+NEXT->PREV: cba4000
 Thread 13 First Array ******************
 X[0] = 0 
 X[1] = 13 
@@ -272,7 +321,8 @@ X[8] = 104
 X[9] = 117 
 X[10] = 130 
 Thread 13 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 121 
 Z[1] = 132 
@@ -285,7 +335,10 @@ Z[7] = 198
 Z[8] = 209 
 Z[9] = 220 
 Z[10] = 231 
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cd1fff0
+sigsegv page: 379
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 132 
 Z[1] = 144 
@@ -298,6 +351,9 @@ Z[7] = 216
 Z[8] = 228 
 Z[9] = 240 
 Z[10] = 252 
+Got SIGSEGV at address: 0x7f8b0cd21ff0
+sigsegv page: 381
+NEXT->PREV: cba4000
 Thread 14 First Array ******************
 X[0] = 0 
 X[1] = 14 
@@ -311,7 +367,8 @@ X[8] = 112
 X[9] = 126 
 X[10] = 140 
 Thread 14 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 143 
 Z[1] = 156 
@@ -324,6 +381,9 @@ Z[7] = 234
 Z[8] = 247 
 Z[9] = 260 
 Z[10] = 273 
+Got SIGSEGV at address: 0x7f8b0cd44ff0
+sigsegv page: 416
+NEXT->PREV: cba4000
 Thread 15 First Array ******************
 X[0] = 0 
 X[1] = 15 
@@ -337,7 +397,10 @@ X[8] = 120
 X[9] = 135 
 X[10] = 150 
 Thread 15 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cd7dff0
+sigsegv page: 473
+NEXT->PREV: 0
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 154 
 Z[1] = 168 
@@ -350,6 +413,9 @@ Z[7] = 252
 Z[8] = 266 
 Z[9] = 280 
 Z[10] = 294 
+Got SIGSEGV at address: 0x7f8b0cd68ff0
+sigsegv page: 452
+NEXT->PREV: cba4000
 Thread 16 First Array ******************
 X[0] = 0 
 X[1] = 16 
@@ -375,8 +441,14 @@ X[8] = 136
 X[9] = 153 
 X[10] = 170 
 Thread 16 second array ************
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
 Thread 17 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 165 
 Z[1] = 180 
@@ -389,6 +461,7 @@ Z[7] = 270
 Z[8] = 285 
 Z[9] = 300 
 Z[10] = 315 
+NEXT->PREV: cba4000
 Thread 18 First Array ******************
 X[0] = 0 
 X[1] = 18 
@@ -402,7 +475,8 @@ X[8] = 144
 X[9] = 162 
 X[10] = 180 
 Thread 18 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 176 
 Z[1] = 192 
@@ -415,7 +489,8 @@ Z[7] = 288
 Z[8] = 304 
 Z[9] = 320 
 Z[10] = 336 
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 187 
 Z[1] = 204 
@@ -428,6 +503,7 @@ Z[7] = 306
 Z[8] = 323 
 Z[9] = 340 
 Z[10] = 357 
+NEXT->PREV: cba4000
 Thread 19 First Array ******************
 X[0] = 0 
 X[1] = 19 
@@ -441,7 +517,8 @@ X[8] = 152
 X[9] = 171 
 X[10] = 190 
 Thread 19 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 198 
 Z[1] = 216 
@@ -454,6 +531,7 @@ Z[7] = 324
 Z[8] = 342 
 Z[9] = 360 
 Z[10] = 378 
+NEXT->PREV: cba4000
 Thread 20 First Array ******************
 X[0] = 0 
 X[1] = 20 
@@ -467,7 +545,8 @@ X[8] = 160
 X[9] = 180 
 X[10] = 200 
 Thread 20 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 209 
 Z[1] = 228 
@@ -480,6 +559,7 @@ Z[7] = 342
 Z[8] = 361 
 Z[9] = 380 
 Z[10] = 399 
+NEXT->PREV: cba4000
 Thread 21 First Array ******************
 X[0] = 0 
 X[1] = 21 
@@ -505,8 +585,14 @@ X[8] = 176
 X[9] = 198 
 X[10] = 220 
 Thread 21 second array ************
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
 Thread 22 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 220 
 Z[1] = 240 
@@ -519,6 +605,7 @@ Z[7] = 360
 Z[8] = 380 
 Z[9] = 400 
 Z[10] = 420 
+NEXT->PREV: cba4000
 Thread 23 First Array ******************
 X[0] = 0 
 X[1] = 23 
@@ -532,7 +619,8 @@ X[8] = 184
 X[9] = 207 
 X[10] = 230 
 Thread 23 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 231 
 Z[1] = 252 
@@ -545,7 +633,8 @@ Z[7] = 378
 Z[8] = 399 
 Z[9] = 420 
 Z[10] = 441 
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 242 
 Z[1] = 264 
@@ -558,6 +647,7 @@ Z[7] = 396
 Z[8] = 418 
 Z[9] = 440 
 Z[10] = 462 
+NEXT->PREV: cba4000
 Thread 24 First Array ******************
 X[0] = 0 
 X[1] = 24 
@@ -571,7 +661,8 @@ X[8] = 192
 X[9] = 216 
 X[10] = 240 
 Thread 24 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 253 
 Z[1] = 276 
@@ -584,6 +675,7 @@ Z[7] = 414
 Z[8] = 437 
 Z[9] = 460 
 Z[10] = 483 
+NEXT->PREV: cba4000
 Thread 25 First Array ******************
 X[0] = 0 
 X[1] = 25 
@@ -597,7 +689,8 @@ X[8] = 200
 X[9] = 225 
 X[10] = 250 
 Thread 25 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 264 
 Z[1] = 288 
@@ -610,6 +703,7 @@ Z[7] = 432
 Z[8] = 456 
 Z[9] = 480 
 Z[10] = 504 
+NEXT->PREV: cba4000
 Thread 26 First Array ******************
 X[0] = 0 
 X[1] = 26 
@@ -635,8 +729,14 @@ X[8] = 216
 X[9] = 243 
 X[10] = 270 
 Thread 26 second array ************
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
 Thread 27 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 275 
 Z[1] = 300 
@@ -649,6 +749,7 @@ Z[7] = 450
 Z[8] = 475 
 Z[9] = 500 
 Z[10] = 525 
+NEXT->PREV: cba4000
 Thread 28 First Array ******************
 X[0] = 0 
 X[1] = 28 
@@ -662,7 +763,8 @@ X[8] = 224
 X[9] = 252 
 X[10] = 280 
 Thread 28 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 286 
 Z[1] = 312 
@@ -675,7 +777,8 @@ Z[7] = 468
 Z[8] = 494 
 Z[9] = 520 
 Z[10] = 546 
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 297 
 Z[1] = 324 
@@ -688,6 +791,7 @@ Z[7] = 486
 Z[8] = 513 
 Z[9] = 540 
 Z[10] = 567 
+NEXT->PREV: cba4000
 Thread 29 First Array ******************
 X[0] = 0 
 X[1] = 29 
@@ -701,7 +805,8 @@ X[8] = 232
 X[9] = 261 
 X[10] = 290 
 Thread 29 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 308 
 Z[1] = 336 
@@ -714,6 +819,7 @@ Z[7] = 504
 Z[8] = 532 
 Z[9] = 560 
 Z[10] = 588 
+NEXT->PREV: cba4000
 Thread 30 First Array ******************
 X[0] = 0 
 X[1] = 30 
@@ -727,7 +833,8 @@ X[8] = 240
 X[9] = 270 
 X[10] = 300 
 Thread 30 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 319 
 Z[1] = 348 
@@ -740,6 +847,7 @@ Z[7] = 522
 Z[8] = 551 
 Z[9] = 580 
 Z[10] = 609 
+NEXT->PREV: cba4000
 Thread 31 First Array ******************
 X[0] = 0 
 X[1] = 31 
@@ -765,8 +873,14 @@ X[8] = 256
 X[9] = 288 
 X[10] = 320 
 Thread 31 second array ************
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
 Thread 32 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 330 
 Z[1] = 360 
@@ -779,6 +893,7 @@ Z[7] = 540
 Z[8] = 570 
 Z[9] = 600 
 Z[10] = 630 
+NEXT->PREV: cba4000
 Thread 33 First Array ******************
 X[0] = 0 
 X[1] = 33 
@@ -792,7 +907,8 @@ X[8] = 264
 X[9] = 297 
 X[10] = 330 
 Thread 33 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 341 
 Z[1] = 372 
@@ -805,7 +921,10 @@ Z[7] = 558
 Z[8] = 589 
 Z[9] = 620 
 Z[10] = 651 
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cfb0ff0
+sigsegv page: 1036
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 352 
 Z[1] = 384 
@@ -818,6 +937,9 @@ Z[7] = 576
 Z[8] = 608 
 Z[9] = 640 
 Z[10] = 672 
+Got SIGSEGV at address: 0x7f8b0cfb2ff0
+sigsegv page: 1038
+NEXT->PREV: cba4000
 Thread 34 First Array ******************
 X[0] = 0 
 X[1] = 34 
@@ -831,7 +953,8 @@ X[8] = 272
 X[9] = 306 
 X[10] = 340 
 Thread 34 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 363 
 Z[1] = 396 
@@ -844,6 +967,9 @@ Z[7] = 594
 Z[8] = 627 
 Z[9] = 660 
 Z[10] = 693 
+Got SIGSEGV at address: 0x7f8b0cfd4ff0
+sigsegv page: 1072
+NEXT->PREV: cba4000
 Thread 35 First Array ******************
 X[0] = 0 
 X[1] = 35 
@@ -857,7 +983,8 @@ X[8] = 280
 X[9] = 315 
 X[10] = 350 
 Thread 35 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 374 
 Z[1] = 408 
@@ -870,6 +997,9 @@ Z[7] = 612
 Z[8] = 646 
 Z[9] = 680 
 Z[10] = 714 
+Got SIGSEGV at address: 0x7f8b0cff8ff0
+sigsegv page: 1108
+NEXT->PREV: cba4000
 Thread 36 First Array ******************
 X[0] = 0 
 X[1] = 36 
@@ -895,8 +1025,14 @@ X[8] = 296
 X[9] = 333 
 X[10] = 370 
 Thread 36 second array ************
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
 Thread 37 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 385 
 Z[1] = 420 
@@ -909,6 +1045,9 @@ Z[7] = 630
 Z[8] = 665 
 Z[9] = 700 
 Z[10] = 735 
+Got SIGSEGV at address: 0x7f8b0d01bff0
+sigsegv page: 1143
+NEXT->PREV: cba4000
 Thread 38 First Array ******************
 X[0] = 0 
 X[1] = 38 
@@ -922,7 +1061,8 @@ X[8] = 304
 X[9] = 342 
 X[10] = 380 
 Thread 38 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 396 
 Z[1] = 432 
@@ -935,7 +1075,10 @@ Z[7] = 648
 Z[8] = 684 
 Z[9] = 720 
 Z[10] = 756 
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0d05eff0
+sigsegv page: 1210
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 407 
 Z[1] = 444 
@@ -948,6 +1091,9 @@ Z[7] = 666
 Z[8] = 703 
 Z[9] = 740 
 Z[10] = 777 
+Got SIGSEGV at address: 0x7f8b0d060ff0
+sigsegv page: 1212
+NEXT->PREV: cba4000
 Thread 39 First Array ******************
 X[0] = 0 
 X[1] = 39 
@@ -961,7 +1107,8 @@ X[8] = 312
 X[9] = 351 
 X[10] = 390 
 Thread 39 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 418 
 Z[1] = 456 
@@ -974,6 +1121,9 @@ Z[7] = 684
 Z[8] = 722 
 Z[9] = 760 
 Z[10] = 798 
+Got SIGSEGV at address: 0x7f8b0d083ff0
+sigsegv page: 1247
+NEXT->PREV: cba4000
 Thread 40 First Array ******************
 X[0] = 0 
 X[1] = 40 
@@ -987,7 +1137,8 @@ X[8] = 320
 X[9] = 360 
 X[10] = 400 
 Thread 40 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 429 
 Z[1] = 468 
@@ -1000,6 +1151,9 @@ Z[7] = 702
 Z[8] = 741 
 Z[9] = 780 
 Z[10] = 819 
+Got SIGSEGV at address: 0x7f8b0d0a7ff0
+sigsegv page: 1283
+NEXT->PREV: cba4000
 Thread 41 First Array ******************
 X[0] = 0 
 X[1] = 41 
@@ -1025,8 +1179,14 @@ X[8] = 336
 X[9] = 378 
 X[10] = 420 
 Thread 41 second array ************
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
 Thread 42 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 440 
 Z[1] = 480 
@@ -1039,6 +1199,9 @@ Z[7] = 720
 Z[8] = 760 
 Z[9] = 800 
 Z[10] = 840 
+Got SIGSEGV at address: 0x7f8b0d0caff0
+sigsegv page: 1318
+NEXT->PREV: cba4000
 Thread 43 First Array ******************
 X[0] = 0 
 X[1] = 43 
@@ -1052,7 +1215,8 @@ X[8] = 344
 X[9] = 387 
 X[10] = 430 
 Thread 43 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 451 
 Z[1] = 492 
@@ -1065,7 +1229,10 @@ Z[7] = 738
 Z[8] = 779 
 Z[9] = 820 
 Z[10] = 861 
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0d10dff0
+sigsegv page: 1385
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 462 
 Z[1] = 504 
@@ -1078,6 +1245,9 @@ Z[7] = 756
 Z[8] = 798 
 Z[9] = 840 
 Z[10] = 882 
+Got SIGSEGV at address: 0x7f8b0d10fff0
+sigsegv page: 1387
+NEXT->PREV: cba4000
 Thread 44 First Array ******************
 X[0] = 0 
 X[1] = 44 
@@ -1091,7 +1261,8 @@ X[8] = 352
 X[9] = 396 
 X[10] = 440 
 Thread 44 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 473 
 Z[1] = 516 
@@ -1104,6 +1275,9 @@ Z[7] = 774
 Z[8] = 817 
 Z[9] = 860 
 Z[10] = 903 
+Got SIGSEGV at address: 0x7f8b0d132ff0
+sigsegv page: 1422
+NEXT->PREV: cba4000
 Thread 45 First Array ******************
 X[0] = 0 
 X[1] = 45 
@@ -1117,7 +1291,8 @@ X[8] = 360
 X[9] = 405 
 X[10] = 450 
 Thread 45 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 484 
 Z[1] = 528 
@@ -1130,6 +1305,9 @@ Z[7] = 792
 Z[8] = 836 
 Z[9] = 880 
 Z[10] = 924 
+Got SIGSEGV at address: 0x7f8b0d156ff0
+sigsegv page: 1458
+NEXT->PREV: cba4000
 Thread 46 First Array ******************
 X[0] = 0 
 X[1] = 46 
@@ -1155,8 +1333,14 @@ X[8] = 376
 X[9] = 423 
 X[10] = 470 
 Thread 46 second array ************
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
 Thread 47 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 495 
 Z[1] = 540 
@@ -1169,6 +1353,9 @@ Z[7] = 810
 Z[8] = 855 
 Z[9] = 900 
 Z[10] = 945 
+Got SIGSEGV at address: 0x7f8b0d179ff0
+sigsegv page: 1493
+NEXT->PREV: cba4000
 Thread 48 First Array ******************
 X[0] = 0 
 X[1] = 48 
@@ -1182,7 +1369,8 @@ X[8] = 384
 X[9] = 432 
 X[10] = 480 
 Thread 48 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 506 
 Z[1] = 552 
@@ -1195,7 +1383,10 @@ Z[7] = 828
 Z[8] = 874 
 Z[9] = 920 
 Z[10] = 966 
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0d1bcff0
+sigsegv page: 1560
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 517 
 Z[1] = 564 
@@ -1208,6 +1399,9 @@ Z[7] = 846
 Z[8] = 893 
 Z[9] = 940 
 Z[10] = 987 
+Got SIGSEGV at address: 0x7f8b0d1beff0
+sigsegv page: 1562
+NEXT->PREV: cba4000
 Thread 49 First Array ******************
 X[0] = 0 
 X[1] = 49 
@@ -1221,7 +1415,8 @@ X[8] = 392
 X[9] = 441 
 X[10] = 490 
 Thread 49 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 528 
 Z[1] = 576 
@@ -1234,6 +1429,9 @@ Z[7] = 864
 Z[8] = 912 
 Z[9] = 960 
 Z[10] = 1008 
+Got SIGSEGV at address: 0x7f8b0d1e1ff0
+sigsegv page: 1597
+NEXT->PREV: cba4000
 Thread 50 First Array ******************
 X[0] = 0 
 X[1] = 50 
@@ -1247,7 +1445,8 @@ X[8] = 400
 X[9] = 450 
 X[10] = 500 
 Thread 50 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 539 
 Z[1] = 588 
@@ -1260,6 +1459,9 @@ Z[7] = 882
 Z[8] = 931 
 Z[9] = 980 
 Z[10] = 1029 
+Got SIGSEGV at address: 0x7f8b0d205ff0
+sigsegv page: 1633
+NEXT->PREV: cba4000
 Thread 51 First Array ******************
 X[0] = 0 
 X[1] = 51 
@@ -1285,8 +1487,14 @@ X[8] = 416
 X[9] = 468 
 X[10] = 520 
 Thread 51 second array ************
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
 Thread 52 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
+Got SIGSEGV at address: 0x7f8b0cbb3474
+sigsegv page: 15
+NEXT->PREV: cba4000
+Got SIGSEGV at address: 0x7f8b0cba4030
 sigsegv page: 0
 Z[0] = 550 
 Z[1] = 600 
@@ -1296,318 +1504,4 @@ Z[4] = 750
 Z[5] = 800 
 Z[6] = 850 
 Z[7] = 900 
-Z[8] = 950 
-Z[9] = 1000 
-Z[10] = 1050 
-Thread 53 First Array ******************
-X[0] = 0 
-X[1] = 53 
-X[2] = 106 
-X[3] = 159 
-X[4] = 212 
-X[5] = 265 
-X[6] = 318 
-X[7] = 371 
-X[8] = 424 
-X[9] = 477 
-X[10] = 530 
-Thread 53 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
-sigsegv page: 0
-Z[0] = 561 
-Z[1] = 612 
-Z[2] = 663 
-Z[3] = 714 
-Z[4] = 765 
-Z[5] = 816 
-Z[6] = 867 
-Z[7] = 918 
-Z[8] = 969 
-Z[9] = 1020 
-Z[10] = 1071 
-Got SIGSEGV at address: 0x7fb6eef7f980
-sigsegv page: 0
-Z[0] = 572 
-Z[1] = 624 
-Z[2] = 676 
-Z[3] = 728 
-Z[4] = 780 
-Z[5] = 832 
-Z[6] = 884 
-Z[7] = 936 
-Z[8] = 988 
-Z[9] = 1040 
-Z[10] = 1092 
-Thread 54 First Array ******************
-X[0] = 0 
-X[1] = 54 
-X[2] = 108 
-X[3] = 162 
-X[4] = 216 
-X[5] = 270 
-X[6] = 324 
-X[7] = 378 
-X[8] = 432 
-X[9] = 486 
-X[10] = 540 
-Thread 54 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
-sigsegv page: 0
-Z[0] = 583 
-Z[1] = 636 
-Z[2] = 689 
-Z[3] = 742 
-Z[4] = 795 
-Z[5] = 848 
-Z[6] = 901 
-Z[7] = 954 
-Z[8] = 1007 
-Z[9] = 1060 
-Z[10] = 1113 
-Thread 55 First Array ******************
-X[0] = 0 
-X[1] = 55 
-X[2] = 110 
-X[3] = 165 
-X[4] = 220 
-X[5] = 275 
-X[6] = 330 
-X[7] = 385 
-X[8] = 440 
-X[9] = 495 
-X[10] = 550 
-Thread 55 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
-sigsegv page: 0
-Z[0] = 594 
-Z[1] = 648 
-Z[2] = 702 
-Z[3] = 756 
-Z[4] = 810 
-Z[5] = 864 
-Z[6] = 918 
-Z[7] = 972 
-Z[8] = 1026 
-Z[9] = 1080 
-Z[10] = 1134 
-Thread 56 First Array ******************
-X[0] = 0 
-X[1] = 56 
-X[2] = 112 
-X[3] = 168 
-X[4] = 224 
-X[5] = 280 
-X[6] = 336 
-X[7] = 392 
-X[8] = 448 
-X[9] = 504 
-X[10] = 560 
-Thread 57 First Array ******************
-X[0] = 0 
-X[1] = 57 
-X[2] = 114 
-X[3] = 171 
-X[4] = 228 
-X[5] = 285 
-X[6] = 342 
-X[7] = 399 
-X[8] = 456 
-X[9] = 513 
-X[10] = 570 
-Thread 56 second array ************
-Thread 57 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
-sigsegv page: 0
-Z[0] = 605 
-Z[1] = 660 
-Z[2] = 715 
-Z[3] = 770 
-Z[4] = 825 
-Z[5] = 880 
-Z[6] = 935 
-Z[7] = 990 
-Z[8] = 1045 
-Z[9] = 1100 
-Z[10] = 1155 
-Thread 58 First Array ******************
-X[0] = 0 
-X[1] = 58 
-X[2] = 116 
-X[3] = 174 
-X[4] = 232 
-X[5] = 290 
-X[6] = 348 
-X[7] = 406 
-X[8] = 464 
-X[9] = 522 
-X[10] = 580 
-Thread 58 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
-sigsegv page: 0
-Z[0] = 616 
-Z[1] = 672 
-Z[2] = 728 
-Z[3] = 784 
-Z[4] = 840 
-Z[5] = 896 
-Z[6] = 952 
-Z[7] = 1008 
-Z[8] = 1064 
-Z[9] = 1120 
-Z[10] = 1176 
-Got SIGSEGV at address: 0x7fb6eef7f980
-sigsegv page: 0
-Z[0] = 627 
-Z[1] = 684 
-Z[2] = 741 
-Z[3] = 798 
-Z[4] = 855 
-Z[5] = 912 
-Z[6] = 969 
-Z[7] = 1026 
-Z[8] = 1083 
-Z[9] = 1140 
-Z[10] = 1197 
-Thread 59 First Array ******************
-X[0] = 0 
-X[1] = 59 
-X[2] = 118 
-X[3] = 177 
-X[4] = 236 
-X[5] = 295 
-X[6] = 354 
-X[7] = 413 
-X[8] = 472 
-X[9] = 531 
-X[10] = 590 
-Thread 59 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
-sigsegv page: 0
-Z[0] = 638 
-Z[1] = 696 
-Z[2] = 754 
-Z[3] = 812 
-Z[4] = 870 
-Z[5] = 928 
-Z[6] = 986 
-Z[7] = 1044 
-Z[8] = 1102 
-Z[9] = 1160 
-Z[10] = 1218 
-Thread 60 First Array ******************
-X[0] = 0 
-X[1] = 60 
-X[2] = 120 
-X[3] = 180 
-X[4] = 240 
-X[5] = 300 
-X[6] = 360 
-X[7] = 420 
-X[8] = 480 
-X[9] = 540 
-X[10] = 600 
-Thread 60 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
-sigsegv page: 0
-Z[0] = 649 
-Z[1] = 708 
-Z[2] = 767 
-Z[3] = 826 
-Z[4] = 885 
-Z[5] = 944 
-Z[6] = 1003 
-Z[7] = 1062 
-Z[8] = 1121 
-Z[9] = 1180 
-Z[10] = 1239 
-Thread 61 First Array ******************
-X[0] = 0 
-X[1] = 61 
-X[2] = 122 
-X[3] = 183 
-X[4] = 244 
-X[5] = 305 
-X[6] = 366 
-X[7] = 427 
-X[8] = 488 
-X[9] = 549 
-X[10] = 610 
-Thread 62 First Array ******************
-X[0] = 0 
-X[1] = 62 
-X[2] = 124 
-X[3] = 186 
-X[4] = 248 
-X[5] = 310 
-X[6] = 372 
-X[7] = 434 
-X[8] = 496 
-X[9] = 558 
-X[10] = 620 
-Thread 61 second array ************
-Thread 62 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
-sigsegv page: 0
-Z[0] = 660 
-Z[1] = 720 
-Z[2] = 780 
-Z[3] = 840 
-Z[4] = 900 
-Z[5] = 960 
-Z[6] = 1020 
-Z[7] = 1080 
-Z[8] = 1140 
-Z[9] = 1200 
-Z[10] = 1260 
-Thread 63 First Array ******************
-X[0] = 0 
-X[1] = 63 
-X[2] = 126 
-X[3] = 189 
-X[4] = 252 
-X[5] = 315 
-X[6] = 378 
-X[7] = 441 
-X[8] = 504 
-X[9] = 567 
-X[10] = 630 
-Thread 63 second array ************
-Got SIGSEGV at address: 0x7fb6eef7f980
-sigsegv page: 0
-Z[0] = 671 
-Z[1] = 732 
-Z[2] = 793 
-Z[3] = 854 
-Z[4] = 915 
-Z[5] = 976 
-Z[6] = 1037 
-Z[7] = 1098 
-Z[8] = 1159 
-Z[9] = 1220 
-Z[10] = 1281 
-Got SIGSEGV at address: 0x7fb6eef7f980
-sigsegv page: 0
-Z[0] = 682 
-Z[1] = 744 
-Z[2] = 806 
-Z[3] = 868 
-Z[4] = 930 
-Z[5] = 992 
-Z[6] = 1054 
-Z[7] = 1116 
-Z[8] = 1178 
-Z[9] = 1240 
-Z[10] = 1302 
-Got SIGSEGV at address: 0x7fb6eef7f980
-sigsegv page: 0
-Z[0] = 693 
-Z[1] = 756 
-Z[2] = 819 
-Z[3] = 882 
-Z[4] = 945 
-Z[5] = 1008 
-Z[6] = 1071 
-Z[7] = 1134 
-Z[8] = 1197 
-Z[9] = 1260 
-Z[10] = 1323 
+Z
