@@ -56,6 +56,7 @@ void swap( int mem_page, int tid ) {
 static my_pthread_mutex_t shalock;
 static int shahand = FIRST_SHARED_PAGE;
 void pages_init(){
+    swap_space_init();
     // Initialize signal handler.
     struct sigaction sa;
     sa.sa_flags = SA_SIGINFO;
@@ -182,6 +183,7 @@ block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_m
         swap(tid_req, get_page_number_real_phy((unsigned long) prev));
     if (next != NULL)
         swap(tid_req, get_page_number_real_phy((unsigned long) next));
+    printf("TID: %d   NEXT->PREV: %x\n", tid_req, next->prev);
     //size_t block_size = prev->free_size - x - sizeof(block_meta);
     size_t block_size = x + sizeof(block_meta);
 
@@ -693,7 +695,7 @@ int get_unused_page_file() {
             sizeof(int));
         if (page_used == 0) {
             //printf("Page free: %d\n", i);
-            note_page_used(i);
+            note_page_used_file(i);
             return i;
         }
     }
@@ -705,7 +707,7 @@ int get_unused_page_file() {
             sizeof(int));
         if (page_used == 0) {
             //printf("Page free: %d\n", i);
-            note_page_used(i + NUM_USER_PAGES);
+            note_page_used_file(i + NUM_USER_PAGES);
             return (i + NUM_USER_PAGES);
         }
     }
@@ -760,7 +762,7 @@ int naive_evictor () {
     if ( evict == 0 ) {
         // first time evciting a page
         printf("we are here\n");
-        swap_space_init(); 
+//        swap_space_init(); 
         srand(time(NULL)); 
         printf("We are here now\n");
         evict++; 
