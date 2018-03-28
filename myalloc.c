@@ -3,6 +3,8 @@
 
 int evict = 0; 
 
+static my_pthread_mutex_t file_lock;
+
 static void handler(int sig, siginfo_t *si, void *unused) {
 
     //if (si->si_addr > &mem_block && si->si_addr < &mem_block + MEM_SIZE) {
@@ -56,6 +58,7 @@ void swap( int mem_page, int tid ) {
 static my_pthread_mutex_t shalock;
 static int shahand = FIRST_SHARED_PAGE;
 void pages_init(){
+    my_pthread_mutex_init(&file_lock, NULL); 
     swap_space_init();
     // Initialize signal handler.
     struct sigaction sa;
@@ -468,7 +471,7 @@ int get_active_tid(int page) {
     int current_page;
     for ( ; i < NUM_PROCESSES; i++) {
         location = get_location(i, page);
-        current_page = get_table_entry(i, page);
+        current_page = get_page_from_table(i, page);
         //printf("%d:%d\n", page, current_page);
         if (location == 0 && current_page == page)
             return i;
@@ -760,21 +763,21 @@ int naive_evictor () {
     // get_unused_page_file
 
     if ( evict == 0 ) {
-        // first time evciting a page
         printf("we are here\n");
-//        swap_space_init(); 
         srand(time(NULL)); 
         printf("We are here now\n");
         evict++; 
     }   
 
-    printf("got here\n");
+   // printf("got here\n");
 
     int offset = get_unused_page_file(); 
 
     int page = rand()%NUM_USER_PAGES; 
 
     unsigned long address = (unsigned long)&mem_block[FIRST_USER_PAGE + page *PAGE_SIZE]; 
+
+    //printf("Here now!\n");
 
     evict_page(address, offset ); 
 
@@ -804,9 +807,15 @@ int swap_space_init() {
     }
 
     // initialize the memory space
+    
     char buffer [8000000]; 
     int write1 = write(swap_file_descriptor,buffer, 8000000);
     int write2 = write(swap_file_descriptor,buffer, 8000000);  
+
+   // int file_size = lseek(swap_file_descriptor, 0, SEEK_END);
+   // printf("file size: %d\n", file_size );
+
+   // exit(1); 
 
     //printf("First write: %d\n", write1);
     //printf("Second write: %d\n", write2);
@@ -820,6 +829,26 @@ int swap_space_init() {
 
 void evict_page ( unsigned long address, int swap_file_offset ) {
 
+   //printf("Setting Size!\n");
+
+  /*  if ( evict == 1 ) {
+
+    char buffer [8000000]; 
+    int write1 = write(swap_file_descriptor,buffer, 8000000);
+    int write2 = write(swap_file_descriptor,buffer, 8000000);  
+    evict++; 
+    } */
+
+   // printf("Holla!\n");
+
+    my_pthread_mutex_lock(&file_lock); 
+
+    int page = get_page_number_real_phy(address); 
+
+    int file_size = lseek(swap_file_descriptor, 0 , SEEK_END); 
+
+    printf("This is the file size : %d\n", file_size );
+
     int seek_size = lseek(swap_file_descriptor, swap_file_offset*PAGE_SIZE, SEEK_SET); 
 
     if ( seek_size == -1 ) {
@@ -828,13 +857,23 @@ void evict_page ( unsigned long address, int swap_file_offset ) {
         exit(EXIT_FAILURE); 
     }
 
+    memory_unprotect_page(page); 
+
     int bytes_written = write(swap_file_descriptor, (void*)address, PAGE_SIZE); 
+
+    printf("bytes written: %d\n", bytes_written);
 
     if ( bytes_written <= 0 ) {
 
         printf("Error evicting page into swap_file\n");
         exit(EXIT_FAILURE); 
     }
+
+    int thread_id =  get_active_tid(page); 
+
+    printf("Succesfully evicted page : %d  of thread : %d\n", page, thread_id);
+
+    my_pthread_mutex_unlock(&file_lock); 
 
     return; 
 }
@@ -848,9 +887,15 @@ to_mem_swap_offset: a pointer to the offset (in the swapfile) of the page being 
 */
 
 int get_from_swap ( unsigned long to_mem_offset, int out_swap_offset) {
-    printf("Attempting to grab from swap file\n");
+
+    my_pthread_mutex_lock(&file_lock); 
+
+    int tid = get_curr_tid(); 
+    int page = get_page_number_real_phy(to_mem_offset); 
+     printf("Thread %d Attempting to grab page %d from swap file *****************\n" , tid, page);
+
     // buffer for the page we are reading from swapfile
-    char from_mem[PAGE_SIZE]; 
+    char from_swap[PAGE_SIZE]; 
 
     int seek_size = lseek(swap_file_descriptor, out_swap_offset*PAGE_SIZE, SEEK_SET); 
 
@@ -860,7 +905,7 @@ int get_from_swap ( unsigned long to_mem_offset, int out_swap_offset) {
         exit(EXIT_FAILURE); 
     }
 
-    int read_bytes = read(swap_file_descriptor, from_mem, PAGE_SIZE);
+    int read_bytes = read(swap_file_descriptor, from_swap, PAGE_SIZE);
 
     if ( read_bytes == 0  ) {
 
@@ -869,11 +914,15 @@ int get_from_swap ( unsigned long to_mem_offset, int out_swap_offset) {
     } 
 
     // unprotect the page being written into memory (swap_file)
+    //int page = get_page_number_real_phy(to_mem_offset); 
+
     if ( mprotect((void*)to_mem_offset, PAGE_SIZE, PROT_READ | PROT_WRITE)  == -1) {
 
         printf("Error unprotecting memory\n");
         exit(EXIT_FAILURE); 
     }
+
+   // memory_protect_page(page); 
 
 
     /* now lseek() to the position (in the swap_file) of the page being place in the swapfile
@@ -890,19 +939,29 @@ int get_from_swap ( unsigned long to_mem_offset, int out_swap_offset) {
 
     int bytes_written = write(swap_file_descriptor, (void*)to_mem_offset, PAGE_SIZE); 
 
+    printf("bytes written : %d\n", bytes_written );
+
     if ( bytes_written <= 0 ){
 
         printf("error writing page to memory\n");
         exit(EXIT_FAILURE); 
     }
+    printf("Value of offset: %d\n", out_swap_offset );
+    printf("Before seg-fault\n");
 
+
+   // memory_unprotect_page(page);
+//mprotect((void*)to_mem_offset, PAGE_SIZE, PROT_READ | PROT_WRITE); 
 
     // now we shall do a direct swap using memcpy
-    memcpy((void*)to_mem_offset, from_mem, PAGE_SIZE ); 
+    memcpy((void*)to_mem_offset, from_swap, PAGE_SIZE ); 
+
+    my_pthread_mutex_unlock(&file_lock); 
 
     // might need to modify metadata of pages
 
     return 1; 
 
 }
+
 
