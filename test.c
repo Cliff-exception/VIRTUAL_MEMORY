@@ -61,7 +61,7 @@ void * test1( void * args) {
 	int * num = (int*) args; 
 	int mult = *num; 
 
-	int * x = (int *) malloc(20 * sizeof(int)); 
+	int * x = (int *) malloc(15600 * sizeof(int)); 
 
 	int i = 0; 
 
@@ -140,7 +140,7 @@ void * test1( void * args) {
 }
 
 void * test2() {
-	int * x = (int *) malloc(20 * sizeof(int)); 
+	int * x = (int *) malloc(15625 * sizeof(int)); 
 
 	int i = 0; 
 	printf("Thread 2 first array ******************\n");
@@ -159,7 +159,7 @@ void * test2() {
 
 	my_pthread_yield(); 
 	printf("Thread 2 second array ************\n");
-	int * z = (int*)malloc(20*sizeof(int)); 
+	int * z = (int*)malloc(15625*sizeof(int)); 
 	//my_pthread_yield();
 
 	int j = 0; 

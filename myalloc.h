@@ -11,9 +11,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/types.h>
-#include<unistd.h>
-#include<sys/mman.h>
-#include<stddef.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <stddef.h>
+#include <time.h> 
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -134,5 +135,6 @@ int swap_space_init();
 void evict_page ( unsigned long address, int swap_file_offset );
 int get_from_swap ( unsigned long to_mem_offset, int out_swap_offset);
 void swap( int mem_page, int tid); 
+int naive_evictor(); 
 
 #endif
