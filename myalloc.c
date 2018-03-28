@@ -132,7 +132,10 @@ block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_m
 
     int page = get_page_number_real_phy((unsigned long)address);
     
-    swap(page, tid_req);
+    if(get_table_entry(tid_req,page)<0)
+    	swap_pages(page,tid_req,get_unused_page());
+    else
+    	swap_pages(page,tid_req,get_page_from_table(tid_req,page));
 
     memcpy((void*)address, &temp_block, sizeof(block_meta));
 
@@ -218,7 +221,7 @@ block_meta * find_block(int tid_req, size_t x) {
     swap(in_page, tid_req);
 
     // Need to swap pages into place to walk linked list.
-    while (b_meta->free_size < (sizeof(block_meta) + x)) {
+    while (b_meta->p_type == DATA && b_meta->free_size < (sizeof(block_meta) + x)) {
     	//printf("curr size: %d\n",b_meta->free_size);
 
         if (b_meta->next == NULL)
