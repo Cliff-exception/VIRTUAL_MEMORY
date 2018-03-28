@@ -48,8 +48,8 @@ void swap( int mem_page, int tid ) {
         get_from_swap(address, swap_offset); 
 
         if ( in_tid > -1 )
-            update_table_entry(in_tid, mem_page, mem_page, 1);
-        update_table_entry(in_tid, mem_page, swap_offset, 1); 
+            update_table_entry(in_tid, mem_page, mem_page, 0);
+        update_table_entry(tid, mem_page, swap_offset, 1); 
 
         return; 
     }
@@ -712,8 +712,6 @@ int naive_evictor () {
 
     evict_page(address, offset ); 
 
-    update_table_entry(tid, page, offset,1); 
-
     return page; 
 }
 
@@ -803,6 +801,9 @@ void evict_page ( unsigned long address, int swap_file_offset ) {
     int thread_id =  get_active_tid(page); 
 
     printf("Succesfully evicted page : %d  of thread : %d\n", page, thread_id);
+
+//    update_table_entry(get_active_tid(page), page, swap_file_offset, 1);
+//    update_table_entry(get_curr_tid(), page, page, 0);
 
     my_pthread_mutex_unlock(&file_lock); 
 
