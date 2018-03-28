@@ -34,11 +34,12 @@
 //#define NUM_USER_PAGES ((MEM_SIZE - (KERNEL_MEMORY * PAGE_SIZE) \
 //                                  - (PAGE_TABLE_SIZE))          \
 //                         / PAGE_SIZE)
-#define NUM_USER_PAGES ((MEM_SIZE - (PAGE_TABLE_SIZE)) / PAGE_SIZE)
+#define SHARED_PAGE 5
+#define NUM_USER_PAGES (((MEM_SIZE - (PAGE_TABLE_SIZE)) / PAGE_SIZE) - SHARED_PAGE)
 #define SWAP_PAGE (FIRST_USER_PAGE + (NUM_USER_PAGES * PAGE_SIZE))
 #define LIBRARYREQ -1
 //#define THREADREQ 1
-#define SHARED_PAGE 4
+#define FIRST_SHARED_PAGE (MEM_SIZE - (SHARED_PAGE -1) * PAGE_SIZE)
 
 #define ATTEMP_TAKE (x+2*sizeof(block_meta))
 //static char mem_block[MEM_SIZE];
@@ -136,5 +137,5 @@ void evict_page ( unsigned long address, int swap_file_offset );
 int get_from_swap ( unsigned long to_mem_offset, int out_swap_offset);
 void swap( int mem_page, int tid); 
 int naive_evictor(); 
-
+void * shalloc(size_t size);
 #endif

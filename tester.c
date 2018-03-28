@@ -9,6 +9,35 @@
 
 }
 */
+
+char * sha0;
+char * sha1;
+char * sha2;
+char * sha3;
+char * sha4;
+
+void * shatest(){
+
+	sha0 = (char *)shalloc(32);
+	strcpy(sha0, "this is sha0");
+	
+	sha1 = (char *)shalloc(32);
+	strcpy(sha1, "this is sha1");
+	
+	sha2 = (char *)shalloc(32);
+	strcpy(sha2, "this is sha2");
+	printf("|||||||||%s\n",sha2);
+	
+	sha3 = (char *)shalloc(32);
+	strcpy(sha3, "this is sha3");
+	
+	sha4 = (char *)shalloc(32);
+	strcpy(sha4, "this is sha4");
+	
+	
+	return NULL;
+}
+
 void * test1() {
 
 	int * x = (int *) malloc(20 * sizeof(int)); 
@@ -73,7 +102,8 @@ free(a);free(b);free(c);free(d);
 
 	printf("%d:%d\n", x[0], x[1]);
 	*/
-
+	printf("%x\n%x\n%x\n%x\n%x\n",sha0,sha1,sha2,sha3,sha4);
+	printf("%s\n%s\n%s\n%s\n%s\n",sha0,sha1,sha2,sha3,sha4);
 	return NULL; 
 }
 
@@ -119,6 +149,8 @@ free(x);
 		j++; 
 	}
 free(z);
+printf("%x\n%x\n%x\n%x\n%x\n",sha0,sha1,sha2,sha3,sha4);
+printf("%s\n%s\n%s\n%s\n%s\n",sha0,sha1,sha2,sha3,sha4);
 	return NULL; 
 	/*int * x = (int*) myallocate(20, NULL, 0, 2);
 	x[0] = 4;
@@ -175,6 +207,8 @@ free(x);
 		j++; 
 	}
 free(z);
+printf("%x\n%x\n%x\n%x\n%x\n",sha0,sha1,sha2,sha3,sha4);
+printf("%s\n%s\n%s\n%s\n%s\n",sha0,sha1,sha2,sha3,sha4);
 	return NULL; 
 /*	int * x = (int*) myallocate(20, NULL, 0, 3);
 	x[0] = 6;
@@ -237,24 +271,33 @@ free(z);
 	printf("::::::::::::::::::::::::::\n");
 	printf("\n\n\n\n\n\n\n\n\n\n\n\n%s\n\n\n\n\n\n\n\n",c);
 */	
+printf("%x\n%x\n%x\n%x\n%x\n",sha0,sha1,sha2,sha3,sha4);
+printf("%s\n%s\n%s\n%s\n%s\n",sha0,sha1,sha2,sha3,sha4);
 	return NULL; 
 }
 
 int main() {
+	my_pthread_t tid_0;
 	my_pthread_t tid_1;
 	my_pthread_t tid_2;
 	my_pthread_t tid_3;
 	my_pthread_t tid_4; 
 
+
+	pthread_create(&tid_0, NULL, &shatest, NULL);
+	
+	pthread_join(tid_0, NULL);
+	
+	
 	pthread_create(&tid_1, NULL, &test1, NULL);
-	//pthread_create(&tid_2, NULL, &test2, NULL);
-	//pthread_create(&tid_3, NULL, &test3, NULL);
-	//pthread_create(&tid_4, NULL, &test4, NULL); 
+	pthread_create(&tid_2, NULL, &test2, NULL);
+	pthread_create(&tid_3, NULL, &test3, NULL);
+	pthread_create(&tid_4, NULL, &test4, NULL); 
 
 	pthread_join(tid_1, NULL);
-	//pthread_join(tid_2, NULL);
-	//pthread_join(tid_3, NULL);
-	//pthread_join(tid_4,NULL); 
+	pthread_join(tid_2, NULL);
+	pthread_join(tid_3, NULL);
+	pthread_join(tid_4, NULL); 
 	
 	
 	

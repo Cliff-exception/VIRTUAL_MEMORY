@@ -2,7 +2,7 @@
 #include "my_pthread_t.h"   // Order matters, don't switch myalloc with pthread!
 
 
-
+int called = 0;
 void * str_test1 () {
 
 	char * x = (char*)malloc(sizeof(char)*20000); 
@@ -57,6 +57,20 @@ void * str_test2 () {
 
 
 void * test1( void * args) {
+
+
+	char * hate;
+	if(called < 10){
+		hate = (char *)shalloc(32);
+		printf("hate: %x\n",hate);
+		*hate;
+		strcpy(hate, "FTW");
+		//*hate = 3;
+	
+		
+		printf("%s\n",hate);
+	}
+	
 
 	int * num = (int*) args; 
 	int mult = *num; 
