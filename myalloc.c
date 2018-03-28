@@ -136,6 +136,12 @@ block_meta * init_block_meta_page(int tid_req, int x, block_meta * prev, block_m
 
     memcpy((void*)address, &temp_block, sizeof(block_meta));
 
+
+    if(next)
+    	address->free_size = next - address;
+    else
+    	address->free_size = &mem_block[MEM_SIZE-1] - (char*)address;//
+    	
     if (next != NULL)
         next->prev = address;
     prev->next = address;
